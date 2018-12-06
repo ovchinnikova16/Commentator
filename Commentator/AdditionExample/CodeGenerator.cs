@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Reflection;
 using System.Reflection.Emit;
-using GrEmit;
 
 namespace AdditionExample
 {
@@ -36,7 +35,9 @@ namespace AdditionExample
                 typeof(int),
                 new[] { typeof(int), typeof(int) });
 
-            using (var il = new GroboIL(methodBuilder))
+            //var helper = new GroboIL(methodBuilder);
+
+            using (var il = new GroboILCollector(methodBuilder))
             {
                 GenerateILCode(il);
             }
@@ -45,7 +46,7 @@ namespace AdditionExample
             return assemblyBuilder;
         }
 
-        private static void GenerateILCode(GroboIL il)
+        private static void GenerateILCode(GroboILCollector il)
         {
             il.Ldarg(0);
             il.Ldarg(1);
