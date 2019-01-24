@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using GrEmit;
@@ -15,6 +16,7 @@ namespace AdditionExample
 
         public GroboILCollector(MethodBuilder methodBuilder) : base(methodBuilder)
         {
+            File.WriteAllText(@"stackInfo.txt", string.Empty);
         }
 
         public new void Ldarg(int index)
@@ -35,6 +37,12 @@ namespace AdditionExample
             SaveStackInfo();
         }
 
+        public new void Pop()
+        {
+            base.Pop();
+            SaveStackInfo();
+        }
+
         private void PrintStackInfo()
         {
             var stackTrace = new StackTrace(true);
@@ -50,12 +58,24 @@ namespace AdditionExample
 
             using (StreamWriter streamWriter = new StreamWriter(stackInfoFileName, true))
             {
+                var stackValues = GetStackValues();
+                if (stackValues == "") return;
                 streamWriter.WriteLine(stackTrace.GetFrame(2).GetFileName());
                 streamWriter.WriteLine(stackTrace.GetFrame(2).GetFileLineNumber());
-                streamWriter.WriteLine(stackFieldInfo?.GetValue(this));
+                //var methodName = stackTrace.GetFrame(2).GetMethod().Name;
+                streamWriter.WriteLine(stackValues);
             }
 
         }
 
+        private string GetStackValues()
+        {
+            var stackInfo = stackFieldInfo?.GetValue(this);
+            if (stackInfo == null)
+                return "";
+            var stackValues = stackInfo.ToString().Remove(0, 1).Split(' ').Select(x => x.Remove(x.Length - 1)).ToArray();
+
+            return  String.Join(" ", stackValues);
+        }
     }
 }

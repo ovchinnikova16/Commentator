@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using ScriptCs.ReplCommands;
 
 namespace Commentator
 {
@@ -7,19 +10,21 @@ namespace Commentator
     {
         private readonly string targetFileName;
         private readonly string infoFileName;
+        private readonly string resultFileName;
         private readonly Dictionary<int, string> comments = new Dictionary<int, string>();
 
-        private readonly string resultFileName = "result.cs";
 
         public Commentator(string targetFileName, string infoFileName)
         {
             this.targetFileName = targetFileName;
             this.infoFileName = infoFileName;
+            this.resultFileName = targetFileName.Remove(targetFileName.Length - 3) + "WithComments.cs";
+            File.WriteAllText(resultFileName, string.Empty);
         }
 
         public void AddComments()
         {
-            GetCommentsInfo();
+            GetCommentsInfoFromFile();
 
             var strNumber = 1;
 
@@ -32,7 +37,10 @@ namespace Commentator
                     using (StreamWriter streamWriter = new StreamWriter(resultFileName, true))
                     {
                         if (comments.ContainsKey(strNumber))
-                            streamWriter.WriteLine("{0} // {1}", line, comments[strNumber]);
+                        {
+                            var stackString = String.Join(", ", comments[strNumber].Split(' ').ToArray());
+                            streamWriter.WriteLine("{0} // [{1}]", line, stackString);
+                        }
                         else
                             streamWriter.WriteLine(line);
                     }
@@ -42,7 +50,7 @@ namespace Commentator
             }
         }
 
-        private void GetCommentsInfo()
+        private void GetCommentsInfoFromFile()
         {
             using (StreamReader streamReader = new StreamReader(infoFileName))
             {
@@ -54,10 +62,37 @@ namespace Commentator
                     int number;
                     if (file == targetFileName && int.TryParse(stringNumber, out number))
                     {
-                        comments.Add(number, stackInfo);
+                        AddNewComment(number, stackInfo);
                     }
+                    else
+                    {
+                        Console.WriteLine("Wrong target file or string number in stackInfo file");
+                    }
+
                 }
             }
+        }
+
+        private void AddNewComment(int stringNumber, string stackInfo)
+        {
+            var newStackValues = stackInfo.Split(' ').ToArray();
+
+            if (!comments.ContainsKey(stringNumber))
+            {
+                comments.Add(stringNumber, stackInfo);
+                return;
+            }
+
+            var currentStackValues = comments[stringNumber].Split(' ').ToArray();
+            var len = Math.Min(newStackValues.Length, currentStackValues.Length);
+            for (int i = 0; i < len; i++)
+            {
+                if (currentStackValues[i] != newStackValues[i])
+                    newStackValues[i] = "Object";
+            }
+
+            comments[stringNumber] = String.Join(" ", newStackValues);
+
         }
     }
 }

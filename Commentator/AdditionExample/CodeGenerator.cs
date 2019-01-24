@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Reflection.Emit;
+using GrEmit;
 
 namespace AdditionExample
 {
@@ -33,25 +34,51 @@ namespace AdditionExample
                 MethodAttributes.Public |
                 MethodAttributes.Static,
                 typeof(int),
-                new[] { typeof(int), typeof(int) });
+                new[] { typeof(int), typeof(int), typeof(double), typeof(double) });
 
             //var helper = new GroboIL(methodBuilder);
 
             using (var il = new GroboILCollector(methodBuilder))
             {
-                GenerateILCode(il);
+                GenerateAdditionWithMethodILCode(il);
             }
 
             typeBuilder.CreateType();
             return assemblyBuilder;
         }
 
-        private static void GenerateILCode(GroboILCollector il)
+        private static void GenerateSimpleAdditionILCode(GroboILCollector il)
         {
             il.Ldarg(0);
             il.Ldarg(1);
             il.Add();
             il.Ret();
         }
+
+        private static void GenerateAdditionWithMethodILCode(GroboILCollector il)
+        {
+            CreateTwoArguments(il, 0, 1);
+            CreateTwoArguments(il, 2, 3);
+            AddNumbers(il);
+            il.Pop();
+            AddNumbers(il);
+            il.Ret();
+        }
+
+        private static void CreateTwoArguments(GroboILCollector il, int firstNumber, int secondNumber)
+        {
+            il.Ldarg(firstNumber);
+            il.Ldarg(secondNumber);
+        }
+
+        private static void AddNumbers(GroboILCollector il)
+        {
+            il.Add();
+        }
     }
 }
+//функция, которая вызывается много раз
+//если два типа, то object
+//обрубать стек
+//LdFld
+
