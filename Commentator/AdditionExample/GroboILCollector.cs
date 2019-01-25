@@ -61,8 +61,8 @@ namespace AdditionExample
                 var stackValues = GetStackValues();
                 if (stackValues == "") return;
                 streamWriter.WriteLine(stackTrace.GetFrame(2).GetFileName());
+                streamWriter.WriteLine(stackTrace.GetFrame(2).GetMethod().Name);
                 streamWriter.WriteLine(stackTrace.GetFrame(2).GetFileLineNumber());
-                //var methodName = stackTrace.GetFrame(2).GetMethod().Name;
                 streamWriter.WriteLine(stackValues);
             }
 

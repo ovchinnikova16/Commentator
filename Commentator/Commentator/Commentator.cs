@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using ScriptCs.ReplCommands;
+using static System.String;
 
 namespace Commentator
 {
@@ -12,6 +12,8 @@ namespace Commentator
         private readonly string infoFileName;
         private readonly string resultFileName;
         private readonly Dictionary<int, string> comments = new Dictionary<int, string>();
+        private readonly Dictionary<string, int> methodMinStackLength = new Dictionary<string, int>();
+        private readonly Dictionary<int, string> metodNameByNumber = new Dictionary<int, string>();
 
 
         public Commentator(string targetFileName, string infoFileName)
@@ -19,7 +21,7 @@ namespace Commentator
             this.targetFileName = targetFileName;
             this.infoFileName = infoFileName;
             this.resultFileName = targetFileName.Remove(targetFileName.Length - 3) + "WithComments.cs";
-            File.WriteAllText(resultFileName, string.Empty);
+            File.WriteAllText(resultFileName, Empty);
         }
 
         public void AddComments()
@@ -37,17 +39,26 @@ namespace Commentator
                     using (StreamWriter streamWriter = new StreamWriter(resultFileName, true))
                     {
                         if (comments.ContainsKey(strNumber))
-                        {
-                            var stackString = String.Join(", ", comments[strNumber].Split(' ').ToArray());
-                            streamWriter.WriteLine("{0} // [{1}]", line, stackString);
-                        }
+                            streamWriter.WriteLine("{0} // [{1}]", line, GetStackString(strNumber));
                         else
                             streamWriter.WriteLine(line);
                     }
-
                     strNumber++;
                 }
             }
+        }
+
+        private string GetStackString(int strNumber)
+        {
+            var stackValues = comments[strNumber].Split(' ').ToArray();
+            var stackValuesArray = stackValues
+                 .Reverse()
+                 .Take(stackValues.Length - methodMinStackLength[metodNameByNumber[strNumber]] + 1)
+                 .Reverse()
+                 .ToArray();
+            var stackString = Join(", ", stackValuesArray);
+
+            return stackString;
         }
 
         private void GetCommentsInfoFromFile()
@@ -57,12 +68,14 @@ namespace Commentator
                 while (!streamReader.EndOfStream)
                 {
                     var file = streamReader.ReadLine();
+                    var methodName = streamReader.ReadLine();
                     var stringNumber = streamReader.ReadLine();
                     var stackInfo = streamReader.ReadLine();
+
                     int number;
                     if (file == targetFileName && int.TryParse(stringNumber, out number))
                     {
-                        AddNewComment(number, stackInfo);
+                        AddNewComment(methodName, number, stackInfo);
                     }
                     else
                     {
@@ -73,26 +86,35 @@ namespace Commentator
             }
         }
 
-        private void AddNewComment(int stringNumber, string stackInfo)
+        private void AddNewComment(string methodName, int stringNumber, string stackInfo)
         {
             var newStackValues = stackInfo.Split(' ').ToArray();
+
+            if (!methodMinStackLength.ContainsKey(methodName))
+                methodMinStackLength.Add(methodName, newStackValues.Length);
 
             if (!comments.ContainsKey(stringNumber))
             {
                 comments.Add(stringNumber, stackInfo);
+                metodNameByNumber.Add(stringNumber, methodName);
                 return;
             }
 
             var currentStackValues = comments[stringNumber].Split(' ').ToArray();
             var len = Math.Min(newStackValues.Length, currentStackValues.Length);
-            for (int i = 0; i < len; i++)
-            {
-                if (currentStackValues[i] != newStackValues[i])
-                    newStackValues[i] = "Object";
-            }
+            var newStack = new string[len]; 
 
-            comments[stringNumber] = String.Join(" ", newStackValues);
+            for (int i = len-1; i >= 0; i--)
+                if (currentStackValues[currentStackValues.Length - i - 1] !=
+                    newStackValues[newStackValues.Length - i - 1])
+                    newStack[len - i - 1] = "Object";
+                else
+                    newStack[len - i - 1] = newStackValues[newStackValues.Length - i - 1];
 
+            if (newStackValues.Length < methodMinStackLength[methodName])
+                methodMinStackLength[methodName] = newStackValues.Length;
+
+            comments[stringNumber] = Join(" ", newStack);
         }
     }
 }

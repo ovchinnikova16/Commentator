@@ -51,6 +51,10 @@ namespace AdditionExample
         {
             il.Ldarg(0);
             il.Ldarg(1);
+            il.Ldarg(2);
+            il.Ldarg(3);
+            il.Pop();
+            il.Pop();
             il.Add();
             il.Ret();
         }
