@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Diagnostics.SymbolStore;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -12,11 +13,40 @@ namespace AdditionExample
     {
         private static readonly FieldInfo stackFieldInfo = typeof(GroboIL).GetField("stack", BindingFlags.NonPublic | BindingFlags.Instance);
 
-        private string stackInfoFileName = "stackInfo.txt";
+        private string stackInfoFileName = @"C:\Users\e.ovc\Commentator\work\stackInfoExample.txt";
 
         public GroboILCollector(MethodBuilder methodBuilder) : base(methodBuilder)
         {
-            File.WriteAllText(@"stackInfo.txt", string.Empty);
+            File.WriteAllText(stackInfoFileName, string.Empty);
+        }
+
+        public GroboILCollector(MethodBuilder methodBuilder, ISymbolDocumentWriter symbolWriter) : base(methodBuilder, symbolWriter)
+        {
+            File.WriteAllText(stackInfoFileName, string.Empty);
+        }
+
+        public GroboILCollector(DynamicMethod method, bool analyzeStack = true)
+          : base(method, analyzeStack)
+        {
+            File.WriteAllText(stackInfoFileName, string.Empty);
+        }
+
+        public GroboILCollector(MethodBuilder method, bool analyzeStack = true)
+            : base(method, analyzeStack)
+        {
+            File.WriteAllText(stackInfoFileName, string.Empty);
+        }
+
+        public GroboILCollector(ConstructorBuilder constructor, bool analyzeStack = true)
+          : base(constructor, analyzeStack)
+        {
+            File.WriteAllText(stackInfoFileName, string.Empty);
+        }
+
+        public GroboILCollector(ConstructorBuilder constructor, ISymbolDocumentWriter symbolDocumentWriter) 
+            : base(constructor, symbolDocumentWriter)
+        {
+              File.WriteAllText(stackInfoFileName, string.Empty);
         }
 
         public new void Ldarg(int index)
@@ -42,6 +72,20 @@ namespace AdditionExample
             base.Pop();
             SaveStackInfo();
         }
+
+        public new void Ldc_I4(int value)
+        {
+            base.Ldc_I4(value);
+            SaveStackInfo();
+        }
+
+        public new void Stfld(FieldInfo field)
+        {
+            base.Stfld(field);
+            SaveStackInfo();
+        }
+
+
 
         private void PrintStackInfo()
         {

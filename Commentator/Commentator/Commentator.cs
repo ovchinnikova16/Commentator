@@ -14,14 +14,16 @@ namespace Commentator
         private readonly Dictionary<int, string> comments = new Dictionary<int, string>();
         private readonly Dictionary<string, int> methodMinStackLength = new Dictionary<string, int>();
         private readonly Dictionary<int, string> metodNameByNumber = new Dictionary<int, string>();
-
+        private readonly string logFile;
 
         public Commentator(string targetFileName, string infoFileName)
         {
             this.targetFileName = targetFileName;
             this.infoFileName = infoFileName;
-            this.resultFileName = targetFileName.Remove(targetFileName.Length - 3) + "WithComments.cs";
+            this.resultFileName = targetFileName; // .Remove(targetFileName.Length - 3) + "WithComments.cs";
+            logFile = Directory.GetCurrentDirectory() + "ExistingAndNewCommentsLog.txt";
             File.WriteAllText(resultFileName, Empty);
+
         }
 
         public void AddComments()
@@ -30,7 +32,11 @@ namespace Commentator
 
             var strNumber = 1;
 
-            using (StreamReader streamReader = new StreamReader(targetFileName))
+            var file = "temp.cs";
+            File.Copy(targetFileName, file);
+            File.WriteAllText(resultFileName, Empty);
+
+            using (StreamReader streamReader = new StreamReader(file))
             {
                 while (!streamReader.EndOfStream)
                 {
@@ -39,12 +45,36 @@ namespace Commentator
                     using (StreamWriter streamWriter = new StreamWriter(resultFileName, true))
                     {
                         if (comments.ContainsKey(strNumber))
-                            streamWriter.WriteLine("{0} // [{1}]", line, GetStackString(strNumber));
+                            if (line.Contains("//"))
+                            {
+                                WriteCommentsLogFile(line, strNumber, targetFileName);
+                                streamWriter.WriteLine(line);
+                            }
+                            else
+                                streamWriter.WriteLine("{0} // [{1}]", line, GetStackString(strNumber));
                         else
                             streamWriter.WriteLine(line);
                     }
                     strNumber++;
                 }
+            }
+            File.Delete("temp.cs");
+        }
+
+
+        private void WriteCommentsLogFile(string line, int strNumber, string fileName)
+        {
+            using (StreamWriter streamWriter = new StreamWriter(logFile, true))
+            {
+                int ind = line.IndexOf("//");
+                string str = line.Substring(0, ind);
+                string comment = line.Substring(ind + 2, line.Length - ind - 2);
+                    streamWriter.WriteLine("File: "+fileName);
+                    streamWriter.WriteLine("String Number: "+strNumber);
+                    streamWriter.WriteLine("String: "+str);
+                    streamWriter.WriteLine("ExistingComment: "+comments[strNumber]);
+                    streamWriter.WriteLine("NewComment: "+comment);
+                    streamWriter.WriteLine("");
             }
         }
 

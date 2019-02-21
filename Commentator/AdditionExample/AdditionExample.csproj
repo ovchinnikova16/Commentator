@@ -33,9 +33,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="GrEmit, Version=2.3.9.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\GrEmit.2.3.9\lib\net45\GrEmit.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="GrEmit, Version=2.1.7.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\GrEmit.2.1.7\lib\net40\GrEmit.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
