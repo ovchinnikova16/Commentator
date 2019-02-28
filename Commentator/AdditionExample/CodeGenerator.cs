@@ -36,7 +36,7 @@ namespace AdditionExample
                 typeof(int),
                 new[] { typeof(int), typeof(int), typeof(double), typeof(double) });
 
-            //var helper = new GroboIL(methodBuilder);
+            var helper = new GroboIL(methodBuilder);
 
             using (var il = new GroboILCollector(methodBuilder))
             {

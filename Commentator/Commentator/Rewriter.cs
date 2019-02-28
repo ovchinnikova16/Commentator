@@ -21,7 +21,7 @@ namespace Commentator
             string[] allfiles = Directory.GetFiles(root, "*.cs", SearchOption.AllDirectories);
             foreach (var candidate in allfiles)
             {
-                Console.WriteLine(candidate);
+                Console.WriteLine("TO_SHELL: " + candidate);
                 ReplaceShellNames(candidate, "GroboIL", "GroboILCollector");
             }
         }
@@ -31,7 +31,7 @@ namespace Commentator
             string[] allfiles = Directory.GetFiles(root, "*.cs", SearchOption.AllDirectories);
             foreach (var candidate in allfiles)
             {
-                Console.WriteLine(candidate);
+                Console.WriteLine("FROM_SHELL: " + candidate);
                 ReplaceShellNames(candidate, "GroboILCollector", "GroboIL");
             }
         }
@@ -39,6 +39,8 @@ namespace Commentator
         private void ReplaceShellNames(string fileName, string nameFrom, string nameTo)
         {
             var file = "temp.cs";
+            if (File.Exists(file))
+                File.Delete(file);
             File.Copy(fileName, file);
             File.WriteAllText(fileName, string.Empty);
 
