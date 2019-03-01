@@ -49,6 +49,9 @@
       <HintPath>..\packages\Common.Logging.2.1.2\lib\net40\Common.Logging.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="GrEmit, Version=2.1.7.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\GrEmit.2.1.7\lib\net40\GrEmit.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.AzureCompilerFacile.Common, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\AzureCompilerFacilePackage.1.0.2.4\lib\net45\Microsoft.AzureCompilerFacile.Common.dll</HintPath>
       <Private>True</Private>
@@ -157,6 +160,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commentator.cs" />
+    <Compile Include="GroboILCollector.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rewriter.cs" />

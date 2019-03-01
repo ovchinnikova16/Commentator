@@ -18,17 +18,14 @@ namespace Commentator
             BuildTargetProject(targetProjectPath);
 
             var rewriter = new Rewriter(targetProjectPath);
+
             rewriter.RewriteToShellName();
 
             RunAllTests(targetProjectPath);
 
             rewriter.RewriteFromShellName();
 
-            //var commentator = new Commentator(infoFileName);
-            //commentator.AddComments();
-
-
-
+            AddCommentsToProject(infoFileName);
         }
 
         private static void BuildTargetProject(string targetProjectPath)
@@ -56,6 +53,12 @@ namespace Commentator
                 process.Start();
                 Console.WriteLine("DONE " + candidate);
             }
+        }
+
+        private static void AddCommentsToProject(string infoFileName)
+        {
+            var commentator = new Commentator(infoFileName);
+            commentator.AddComments();
         }
     }
 }
