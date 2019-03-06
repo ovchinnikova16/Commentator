@@ -8,7 +8,7 @@ using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using GrEmit;
 
-namespace AdditionExample
+namespace Commentator
 {
     public class GroboILCollector : GroboIL
     {
@@ -18,36 +18,30 @@ namespace AdditionExample
 
         public GroboILCollector(MethodBuilder methodBuilder) : base(methodBuilder)
         {
-            File.WriteAllText(stackInfoFileName, string.Empty);
         }
 
         public GroboILCollector(MethodBuilder methodBuilder, ISymbolDocumentWriter symbolWriter) : base(methodBuilder, symbolWriter)
         {
-            File.WriteAllText(stackInfoFileName, string.Empty);
         }
 
         public GroboILCollector(DynamicMethod method, bool analyzeStack = true)
           : base(method, analyzeStack)
         {
-            File.WriteAllText(stackInfoFileName, string.Empty);
         }
 
         public GroboILCollector(MethodBuilder method, bool analyzeStack = true)
             : base(method, analyzeStack)
         {
-            File.WriteAllText(stackInfoFileName, string.Empty);
         }
 
         public GroboILCollector(ConstructorBuilder constructor, bool analyzeStack = true)
           : base(constructor, analyzeStack)
         {
-            File.WriteAllText(stackInfoFileName, string.Empty);
         }
 
         public GroboILCollector(ConstructorBuilder constructor, ISymbolDocumentWriter symbolDocumentWriter) 
             : base(constructor, symbolDocumentWriter)
         {
-              File.WriteAllText(stackInfoFileName, string.Empty);
         }
 
         public new void Stfld(FieldInfo field)
@@ -685,11 +679,11 @@ namespace AdditionExample
         private void SaveStackInfo()
         {
             var stackTrace = new StackTrace(true);
+            var stackValues = GetStackValues();
+            if (string.IsNullOrEmpty(stackValues)) return;
 
             using (StreamWriter streamWriter = new StreamWriter(stackInfoFileName, true))
             {
-                var stackValues = GetStackValues();
-                if (stackValues == "") return;
                 streamWriter.WriteLine(stackTrace.GetFrame(2).GetFileName());
                 streamWriter.WriteLine(stackTrace.GetFrame(2).GetMethod().Name);
                 streamWriter.WriteLine(stackTrace.GetFrame(2).GetFileLineNumber());

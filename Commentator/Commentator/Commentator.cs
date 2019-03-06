@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ScriptCs.ReplCommands;
 using static System.String;
 
 namespace Commentator
 {
-    class Commentator
+    public class Commentator
     {
         private  Dictionary<int, string> comments;
         private  Dictionary<string, int> methodMinStackLength;
@@ -17,7 +18,7 @@ namespace Commentator
         public Commentator(string infoFileName)
         {
             GetCommentsInfoFromFile(infoFileName);
-            logFile = Directory.GetCurrentDirectory() + "ExistingAndNewCommentsLog.txt";
+            logFile = Path.GetDirectoryName(infoFileName) + @"\ExistingAndNewCommentsLog.txt";
 
         }
 
@@ -33,7 +34,7 @@ namespace Commentator
                     var stackInfo = streamReader.ReadLine();
 
                     int number;
-                    if (int.TryParse(stringNumber, out number))
+                    if (int.TryParse(stringNumber, out number)  && !IsNullOrEmpty(stackInfo) && stackInfo.Length > 1)
                     {
                         if (!commentsByFile.ContainsKey(file))
                             commentsByFile.Add(file, new List<CommentInfo>());
@@ -57,6 +58,7 @@ namespace Commentator
                 }
 
                 RewriteFileWithComments(file.Key);
+                Console.WriteLine("COMMENT: "+file.Key);
             }
         }
 
@@ -106,8 +108,8 @@ namespace Commentator
                     streamWriter.WriteLine("File: "+fileName);
                     streamWriter.WriteLine("String Number: "+strNumber);
                     streamWriter.WriteLine("String: "+str);
-                    streamWriter.WriteLine("ExistingComment: "+comments[strNumber]);
-                    streamWriter.WriteLine("NewComment: "+comment);
+                    streamWriter.WriteLine("ExistingComment: "+comment);
+                    streamWriter.WriteLine("NewComment: ["+ comments[strNumber]+"]");
                     streamWriter.WriteLine("");
             }
         }

@@ -22,7 +22,7 @@ namespace Commentator
             foreach (var candidate in allfiles)
             {
                 Console.WriteLine("TO_SHELL: " + candidate);
-                ReplaceShellNames(candidate, "GroboIL", "GroboILCollector");
+                ReplaceShellNames(candidate, "GroboIL", "Commentator.GroboILCollector");
             }
         }
 
@@ -32,7 +32,7 @@ namespace Commentator
             foreach (var candidate in allfiles)
             {
                 Console.WriteLine("FROM_SHELL: " + candidate);
-                ReplaceShellNames(candidate, "GroboILCollector", "GroboIL");
+                ReplaceShellNames(candidate, "Commentator.GroboILCollector", "GroboIL");
             }
         }
 
@@ -41,6 +41,7 @@ namespace Commentator
             var file = "temp.cs";
             if (File.Exists(file))
                 File.Delete(file);
+
             File.Copy(fileName, file);
             File.WriteAllText(fileName, string.Empty);
 
@@ -60,6 +61,7 @@ namespace Commentator
                 }
             }
             File.Delete("temp.cs");
+
         }
     }
 }
