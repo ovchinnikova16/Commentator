@@ -24,23 +24,31 @@ namespace Commentator
 
         private void GetCommentsInfoFromFile(string infoFileName)
         {
-            using (StreamReader streamReader = new StreamReader(infoFileName))
+            try
             {
-                while (!streamReader.EndOfStream)
+                using (StreamReader streamReader = new StreamReader(infoFileName))
                 {
-                    var file = streamReader.ReadLine();
-                    var methodName = streamReader.ReadLine();
-                    var stringNumber = streamReader.ReadLine();
-                    var stackInfo = streamReader.ReadLine();
-
-                    int number;
-                    if (int.TryParse(stringNumber, out number)  && !IsNullOrEmpty(stackInfo) && stackInfo.Length > 1)
+                    while (!streamReader.EndOfStream)
                     {
-                        if (!commentsByFile.ContainsKey(file))
-                            commentsByFile.Add(file, new List<CommentInfo>());
-                        commentsByFile[file].Add(new CommentInfo(file, methodName, number, stackInfo));
+                        var file = streamReader.ReadLine();
+                        var methodName = streamReader.ReadLine();
+                        var stringNumber = streamReader.ReadLine();
+                        var stackInfo = streamReader.ReadLine();
+
+                        int number;
+                        if (int.TryParse(stringNumber, out number) && !IsNullOrEmpty(stackInfo) && stackInfo.Length > 1)
+                        {
+                            if (!commentsByFile.ContainsKey(file))
+                                commentsByFile.Add(file, new List<CommentInfo>());
+                            commentsByFile[file].Add(new CommentInfo(file, methodName, number, stackInfo));
+                        }
                     }
                 }
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Stack Info File Error");
+                throw;
             }
         }
 

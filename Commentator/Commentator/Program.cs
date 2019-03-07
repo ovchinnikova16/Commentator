@@ -15,23 +15,28 @@ namespace Commentator
             //string targetFileName = args[0];
             //string infoFileName = args[1];
 
-            string infoFileName = @"C:\Users\e.ovc\Commentator\work\stackInfo.txt";
+            var infoFileName = @"C:\Users\e.ovc\Commentator\work\stackInfo.txt";
             var targetAssemblyPath = @"C:\Users\e.ovc\Commentator\project1\flash.props";
-            var targetProjectPath =
-                @"C:\Users\e.ovc\Commentator\project1\flash.props\PropertiesCollector\Compile\Emitters";
+            var targetProjectPath = @"C:\Users\e.ovc\Commentator\project1\flash.props\PropertiesCollector.Benchmarks";
+            var helperPath = @"C:\Users\e.ovc\Commentator\project1\RequisitesReader";
 
+            //var helperRewrite = new Rewriter(helperPath);
+            //helperRewrite.RewriteToShellName();
+            //BuildTargetAssembly(helperPath);
 
-            var rewriter = new Rewriter(targetProjectPath);
-
-            rewriter.RewriteToShellName();
-
-            BuildTargetAssembly(targetAssemblyPath);
+            //var rewrite = new Rewriter(targetProjectPath);
+            //rewrite.RewriteToShellName();
+            //BuildTargetAssembly(targetAssemblyPath);
 
             RunAllTests(targetAssemblyPath, infoFileName);
 
-            rewriter.RewriteFromShellName();
+            //helperRewrite.RewriteFromShellName();
+            //rewrite.RewriteFromShellName();
 
-            AddCommentsToProject(infoFileName);
+            //AddCommentsToProject(infoFileName);
+
+            //BuildTargetAssembly(helperPath);
+            //BuildTargetAssembly(targetAssemblyPath);
         }
 
         private static void BuildTargetAssembly(string targetAssemblyPath)
@@ -41,7 +46,7 @@ namespace Commentator
             startInfo.FileName = "cmd.exe";
             startInfo.Arguments = @"/c cd "
                                   + targetAssemblyPath
-                                  + " && cm build-deps && cm build";
+                                  + " && cm build";
             process.StartInfo = startInfo;
             process.Start();
         }
@@ -50,15 +55,15 @@ namespace Commentator
         {
             File.WriteAllText(infoFileName, string.Empty);
             ITestEngine engine = TestEngineActivator.CreateInstance();
-            var allfiles = Directory.GetFiles(targetProjectPath, "*Test*.dll", SearchOption.AllDirectories).Where(x => x.Contains("Release")).ToArray();
+            var allfiles = Directory.GetFiles(targetProjectPath, "*UnitTest*.dll", SearchOption.AllDirectories).Where(x => x.Contains("Release")).ToArray();
             foreach (var candidate in allfiles)
             {
+                Console.WriteLine("RUN_TESTS: "+Path.GetFileName(candidate));
+
                 Directory.SetCurrentDirectory(Path.GetDirectoryName(candidate));
                 TestPackage package = new TestPackage(candidate);
                 ITestRunner runner = engine.GetRunner(package);
                 XmlNode testResult = runner.Run(new NullListener(), TestFilter.Empty);
-
-                Console.WriteLine(Path.GetFileName(candidate));
             }
         }
 

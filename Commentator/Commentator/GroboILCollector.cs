@@ -649,6 +649,18 @@ namespace Commentator
             SaveStackInfo();
         }
 
+        public new void SafeCall(MethodInfo method, Type constrained = null, bool tailcall = false, Type[] optionalParameterTypes = null, bool isVirtual = false)
+        {
+            base.Call(method, constrained, tailcall, optionalParameterTypes, isVirtual);
+            SaveStackInfo();
+        }
+
+        public new void SafeCall(ConstructorInfo constructor)
+        {
+            base.Call(constructor);
+            SaveStackInfo();
+        }
+
         public new void Callnonvirt(MethodInfo method, bool tailcall = false, Type[] optionalParameterTypes = null)
         {
             base.Callnonvirt(method, tailcall, optionalParameterTypes);
@@ -680,7 +692,7 @@ namespace Commentator
         {
             var stackTrace = new StackTrace(true);
             var stackValues = GetStackValues();
-            if (string.IsNullOrEmpty(stackValues)) return;
+            if (string.IsNullOrEmpty(stackValues) || stackValues.Length < 2) return;
 
             using (StreamWriter streamWriter = new StreamWriter(stackInfoFileName, true))
             {

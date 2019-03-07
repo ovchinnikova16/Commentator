@@ -28,7 +28,7 @@ namespace Commentator
 
         public void RewriteFromShellName()
         {
-            string[] allfiles = Directory.GetFiles(root, "*.cs", SearchOption.AllDirectories);
+            var allfiles = Directory.GetFiles(root, "*.cs", SearchOption.AllDirectories);
             foreach (var candidate in allfiles)
             {
                 Console.WriteLine("FROM_SHELL: " + candidate);
@@ -53,7 +53,7 @@ namespace Commentator
 
                     using (StreamWriter streamWriter = new StreamWriter(fileName, true))
                     {
-                        if (line.Contains(nameFrom+" ") || line.Contains(nameFrom+"("))
+                        if (line.Contains(nameFrom+" ") || !line.Contains(nameFrom+"C"))
                             streamWriter.WriteLine(line.Replace(nameFrom, nameTo));
                         else
                             streamWriter.WriteLine(line);
