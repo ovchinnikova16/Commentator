@@ -42,6 +42,7 @@ namespace Commentator
         private static void BuildTargetAssembly(string targetAssemblyPath)
         {
             Process process = new Process();
+	        //review: можно сеттить филды при создании
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.FileName = "cmd.exe";
             startInfo.Arguments = @"/c cd "

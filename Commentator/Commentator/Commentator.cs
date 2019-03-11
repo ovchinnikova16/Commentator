@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ScriptCs.ReplCommands;
-using static System.String;
+using static System.String; //review: воу воу) 
 
 namespace Commentator
 {
     public class Commentator
     {
+	    //review: зачем это в филдах?
         private  Dictionary<int, string> comments;
         private  Dictionary<string, int> methodMinStackLength;
         private  Dictionary<int, string> methodNameByNumber;
@@ -17,6 +18,7 @@ namespace Commentator
 
         public Commentator(string infoFileName)
         {
+	        //review: кажется, что не оч прикольно делать тяжелые операции в конструкторе. а это выглядит, как нечистая функция
             GetCommentsInfoFromFile(infoFileName);
             logFile = Path.GetDirectoryName(infoFileName) + @"\ExistingAndNewCommentsLog.txt";
 
@@ -35,6 +37,7 @@ namespace Commentator
                         var stringNumber = streamReader.ReadLine();
                         var stackInfo = streamReader.ReadLine();
 
+					//review: out var
                         int number;
                         if (int.TryParse(stringNumber, out number) && !IsNullOrEmpty(stackInfo) && stackInfo.Length > 1)
                         {
@@ -169,6 +172,7 @@ namespace Commentator
 
     public class CommentInfo
     {
+	    //review: зачем сет?
         public string FileName { get; set; }
         public string MethodName { get; set; }
         public int StringNumber { get; set; }

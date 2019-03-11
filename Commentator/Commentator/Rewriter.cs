@@ -22,6 +22,7 @@ namespace Commentator
             foreach (var candidate in allfiles)
             {
                 Console.WriteLine("TO_SHELL: " + candidate);
+	            // review: вынести эти константы в филды. А то у тебя они повторяются 2 раза.
                 ReplaceShellNames(candidate, "GroboIL", "Commentator.GroboILCollector");
             }
         }
@@ -44,6 +45,7 @@ namespace Commentator
 
             File.Copy(fileName, file);
             File.WriteAllText(fileName, string.Empty);
+			//review: ReadAllLines(), WriteAllLines()
 
             using (StreamReader streamReader = new StreamReader(file))
             {
