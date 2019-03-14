@@ -10,7 +10,8 @@ namespace Commentator
     public class Rewriter
     {
         private string root;
-
+        private readonly string simpleClass = "GroboIL";
+        private readonly string shellClass = "Commentator.GroboILCollector";
         public Rewriter(string projectPath)
         {
             root = projectPath;
@@ -22,7 +23,7 @@ namespace Commentator
             foreach (var candidate in allfiles)
             {
                 Console.WriteLine("TO_SHELL: " + candidate);
-                ReplaceShellNames(candidate, "GroboIL", "Commentator.GroboILCollector");
+                ReplaceShellNames(candidate, simpleClass, shellClass);
             }
         }
 
@@ -32,25 +33,17 @@ namespace Commentator
             foreach (var candidate in allfiles)
             {
                 Console.WriteLine("FROM_SHELL: " + candidate);
-                ReplaceShellNames(candidate, "Commentator.GroboILCollector", "GroboIL");
+                ReplaceShellNames(candidate, shellClass, simpleClass);
             }
         }
 
         private void ReplaceShellNames(string fileName, string nameFrom, string nameTo)
         {
-            var file = "temp.cs";
-            if (File.Exists(file))
-                File.Delete(file);
-
-            File.Copy(fileName, file);
+            var lines = File.ReadLines(fileName);
             File.WriteAllText(fileName, string.Empty);
 
-            using (StreamReader streamReader = new StreamReader(file))
-            {
-                while (!streamReader.EndOfStream)
+            foreach (var line in lines)
                 {
-                    var line = streamReader.ReadLine();
-
                     using (StreamWriter streamWriter = new StreamWriter(fileName, true))
                     {
                         if (line.Contains(nameFrom+" ") || !line.Contains(nameFrom+"C"))
@@ -59,9 +52,6 @@ namespace Commentator
                             streamWriter.WriteLine(line);
                     }
                 }
-            }
-            File.Delete("temp.cs");
-
         }
     }
 }

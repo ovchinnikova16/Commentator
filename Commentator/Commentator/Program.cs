@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using NUnit.Engine;
-using NUnit.Framework.Constraints;
 
 namespace Commentator
 {
@@ -24,16 +23,16 @@ namespace Commentator
             //helperRewrite.RewriteToShellName();
             //BuildTargetAssembly(helperPath);
 
-            //var rewrite = new Rewriter(targetProjectPath);
+            var rewrite = new Rewriter(targetProjectPath);
             //rewrite.RewriteToShellName();
             //BuildTargetAssembly(targetAssemblyPath);
 
-            RunAllTests(targetAssemblyPath, infoFileName);
+            //RunAllTests(targetAssemblyPath, infoFileName);
 
             //helperRewrite.RewriteFromShellName();
             //rewrite.RewriteFromShellName();
 
-            //AddCommentsToProject(infoFileName);
+            AddCommentsToProject(infoFileName);
 
             //BuildTargetAssembly(helperPath);
             //BuildTargetAssembly(targetAssemblyPath);

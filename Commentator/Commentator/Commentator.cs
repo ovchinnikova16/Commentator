@@ -2,28 +2,25 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using ScriptCs.ReplCommands;
-using static System.String;
+using System.Text;
 
 namespace Commentator
 {
     public class Commentator
     {
-        private  Dictionary<int, string> comments;
-        private  Dictionary<string, int> methodMinStackLength;
-        private  Dictionary<int, string> methodNameByNumber;
-        private readonly Dictionary<string, List<CommentInfo>> commentsByFile = new Dictionary<string, List<CommentInfo>>();
         private readonly string logFile;
+        private readonly string infoFile;
 
         public Commentator(string infoFileName)
         {
-            GetCommentsInfoFromFile(infoFileName);
+            infoFile = infoFileName;
             logFile = Path.GetDirectoryName(infoFileName) + @"\ExistingAndNewCommentsLog.txt";
-
         }
 
-        private void GetCommentsInfoFromFile(string infoFileName)
+        private Dictionary<string, List<CommentInfo>> GetCommentsInfoFromFile(string infoFileName)
         {
+            var commentsByFile = new Dictionary<string, List<CommentInfo>>();
+
             try
             {
                 using (StreamReader streamReader = new StreamReader(infoFileName))
@@ -35,8 +32,7 @@ namespace Commentator
                         var stringNumber = streamReader.ReadLine();
                         var stackInfo = streamReader.ReadLine();
 
-                        int number;
-                        if (int.TryParse(stringNumber, out number) && !IsNullOrEmpty(stackInfo) && stackInfo.Length > 1)
+                        if (int.TryParse(stringNumber, out var number) && !string.IsNullOrEmpty(stackInfo) && stackInfo.Length > 1)
                         {
                             if (!commentsByFile.ContainsKey(file))
                                 commentsByFile.Add(file, new List<CommentInfo>());
@@ -44,6 +40,7 @@ namespace Commentator
                         }
                     }
                 }
+                return commentsByFile;
             }
             catch (Exception)
             {
@@ -52,67 +49,71 @@ namespace Commentator
             }
         }
 
-        public void AddComments( )
+        public void AddComments()
         {
+            var commentsByFile = GetCommentsInfoFromFile(infoFile);
+
             foreach (var file in commentsByFile)
             {
-                comments = new Dictionary<int, string>();
-                methodMinStackLength = new Dictionary<string, int>();
-                methodNameByNumber = new Dictionary<int, string>();
+                var comments = new Dictionary<int, string>();
+                var methodMinStackLength = new Dictionary<string, int>();
+                var methodNameByNumber = new Dictionary<int, string>();
 
                 foreach (var commentInfo in commentsByFile[file.Key])
                 {
-                    AddNewComment(commentInfo.MethodName, commentInfo.StringNumber, commentInfo.StackInfo);
+                    AddNewComment(
+                        commentInfo.MethodName, 
+                        commentInfo.StringNumber, 
+                        commentInfo.StackInfo, 
+                        comments, 
+                        methodMinStackLength, 
+                        methodNameByNumber);
                 }
 
-                RewriteFileWithComments(file.Key);
+                RewriteFileWithComments(file.Key, comments, methodNameByNumber, methodMinStackLength);
                 Console.WriteLine("COMMENT: "+file.Key);
             }
         }
 
-        private void RewriteFileWithComments(string targetFileName)
+        private void RewriteFileWithComments(
+            string targetFileName, 
+            Dictionary<int, string> comments, 
+            Dictionary<int, string> methodNameByNumber, 
+            Dictionary<string, int> methodMinStackLength)
         {
             var strNumber = 1;
+            var lines = File.ReadLines(targetFileName);
+            var content = new StringBuilder();
 
-            var fileName = "temp.cs";
-            File.Copy(targetFileName, fileName);
-            File.WriteAllText(targetFileName, Empty);
-
-            using (StreamReader streamReader = new StreamReader(fileName))
+            foreach (var line in lines)
             {
-                while (!streamReader.EndOfStream)
-                {
-                    var line = streamReader.ReadLine();
-
-                    using (StreamWriter streamWriter = new StreamWriter(targetFileName, true))
+                if (comments.ContainsKey(strNumber))
+                    if (line.Contains("//"))
                     {
-                        if (comments.ContainsKey(strNumber))
-                            if (line.Contains("//"))
-                            {
-                                WriteCommentsLogFile(line, strNumber, targetFileName);
-                                streamWriter.WriteLine(line);
-                            }
-                            else
-                                streamWriter.WriteLine("{0} // [{1}]", line, GetStackString(strNumber));
-                        else
-                            streamWriter.WriteLine(line);
+                        WriteCommentsLogFile(line, strNumber, targetFileName, comments);
+                        content.AppendLine(line);
                     }
-
-                    strNumber++;
-                }
+                    else
+                        content.AppendLine(string.Format("{0} // [{1}]", line, GetStackString(strNumber, comments, methodMinStackLength, methodNameByNumber)));
+                else
+                    content.AppendLine(line);
+                strNumber++;
             }
-
-            File.Delete("temp.cs");
+            File.WriteAllText(targetFileName, content.ToString());
         }
 
 
-        private void WriteCommentsLogFile(string line, int strNumber, string fileName)
+        private void WriteCommentsLogFile(
+            string line, 
+            int strNumber, 
+            string fileName, 
+            Dictionary<int, string> comments)
         {
             using (StreamWriter streamWriter = new StreamWriter(logFile, true))
             {
-                int ind = line.IndexOf("//");
-                string str = line.Substring(0, ind);
-                string comment = line.Substring(ind + 2, line.Length - ind - 2);
+                var ind = line.IndexOf("//");
+                var str = line.Substring(0, ind);
+                var comment = line.Substring(ind + 2, line.Length - ind - 2);
                     streamWriter.WriteLine("File: "+fileName);
                     streamWriter.WriteLine("String Number: "+strNumber);
                     streamWriter.WriteLine("String: "+str);
@@ -122,7 +123,10 @@ namespace Commentator
             }
         }
 
-        private string GetStackString(int strNumber)
+        private string GetStackString(int strNumber, 
+            Dictionary<int, string> comments, 
+            Dictionary<string, int> methodMinStackLength, 
+            Dictionary<int, string> methodNameByNumber)
         {
             var stackValues = comments[strNumber].Split(' ').ToArray();
             var stackValuesArray = stackValues
@@ -130,12 +134,18 @@ namespace Commentator
                  .Take(stackValues.Length - methodMinStackLength[methodNameByNumber[strNumber]] + 1)
                  .Reverse()
                  .ToArray();
-            var stackString = Join(", ", stackValuesArray);
+            var stackString = string.Join(", ", stackValuesArray);
 
             return stackString;
         }
 
-        private void AddNewComment(string methodName, int stringNumber, string stackInfo)
+        private void AddNewComment(
+            string methodName, 
+            int stringNumber, 
+            string stackInfo,
+            Dictionary<int, string> comments,
+            Dictionary<string, int> methodMinStackLength,
+            Dictionary<int, string> methodNameByNumber)
         {
             var newStackValues = stackInfo.Split(' ').ToArray();
 
@@ -163,16 +173,16 @@ namespace Commentator
             if (newStackValues.Length < methodMinStackLength[methodName])
                 methodMinStackLength[methodName] = newStackValues.Length;
 
-            comments[stringNumber] = Join(" ", newStack);
+            comments[stringNumber] = string.Join(" ", newStack);
         }
     }
 
     public class CommentInfo
     {
-        public string FileName { get; set; }
-        public string MethodName { get; set; }
-        public int StringNumber { get; set; }
-        public string StackInfo { get; set; }
+        public string FileName { get; }
+        public string MethodName { get; }
+        public int StringNumber { get; }
+        public string StackInfo { get; }
 
         public CommentInfo(string fileName, string methodName, int stringNumber, string stackInfo)
         {
