@@ -8,6 +8,7 @@ namespace Commentator
 {
     public class Commentator
     {
+	    //review: зачем это в филдах?
         private readonly string logFile;
         private readonly string infoFile;
 

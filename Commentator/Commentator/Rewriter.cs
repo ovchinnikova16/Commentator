@@ -41,6 +41,7 @@ namespace Commentator
         {
             var lines = File.ReadLines(fileName);
             File.WriteAllText(fileName, string.Empty);
+			//review: ReadAllLines(), WriteAllLines()
 
             foreach (var line in lines)
                 {
