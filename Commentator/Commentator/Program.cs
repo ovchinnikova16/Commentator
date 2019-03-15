@@ -16,26 +16,38 @@ namespace Commentator
 
             var infoFileName = @"C:\Users\e.ovc\Commentator\work\stackInfo.txt";
             var targetAssemblyPath = @"C:\Users\e.ovc\Commentator\project1\flash.props";
-            var targetProjectPath = @"C:\Users\e.ovc\Commentator\project1\flash.props\PropertiesCollector.Benchmarks";
             var helperPath = @"C:\Users\e.ovc\Commentator\project1\RequisitesReader";
+            var targetProjectPath1 = @"C:\Users\e.ovc\Commentator\project1\flash.props\PropertiesCollector.Benchmarks";
+            var targetProjectPath2 = @"C:\Users\e.ovc\Commentator\project1\flash.props\PropertiesCollector.UnitTests";
+            var targetProjectPath3 = @"C:\Users\e.ovc\Commentator\project1\flash.props\PropertiesCollector";
+
 
             //var helperRewrite = new Rewriter(helperPath);
             //helperRewrite.RewriteToShellName();
             //BuildTargetAssembly(helperPath);
 
-            var rewrite = new Rewriter(targetProjectPath);
-            //rewrite.RewriteToShellName();
-            //BuildTargetAssembly(targetAssemblyPath);
+            var rewrite1 = new Rewriter(targetProjectPath1);
+            rewrite1.RewriteToShellName();
+            var rewrite2 = new Rewriter(targetProjectPath2);
+            rewrite2.RewriteToShellName();
+            var rewrite3 = new Rewriter(targetProjectPath3);
+            rewrite3.RewriteToShellName();
 
-            //RunAllTests(targetAssemblyPath, infoFileName);
+            BuildTargetAssembly(targetAssemblyPath);
+
+            RunAllTests(targetAssemblyPath, infoFileName);
 
             //helperRewrite.RewriteFromShellName();
             //rewrite.RewriteFromShellName();
 
-            AddCommentsToProject(infoFileName);
+            rewrite1.RewriteFromShellName();
+            rewrite2.RewriteFromShellName();
+            rewrite3.RewriteFromShellName();
+
+            AddCommentsToProject(infoFileName, targetAssemblyPath);
 
             //BuildTargetAssembly(helperPath);
-            //BuildTargetAssembly(targetAssemblyPath);
+            BuildTargetAssembly(targetAssemblyPath);
         }
 
         private static void BuildTargetAssembly(string targetAssemblyPath)
@@ -82,9 +94,9 @@ namespace Commentator
             }
         }
 
-        private static void AddCommentsToProject(string infoFileName)
+        private static void AddCommentsToProject(string infoFileName, string projectName)
         {
-            var commentator = new Commentator(infoFileName);
+            var commentator = new Commentator(infoFileName, projectName);
             commentator.AddComments();
         }
 

@@ -698,10 +698,9 @@ namespace Commentator
             {
                 streamWriter.WriteLine(stackTrace.GetFrame(2).GetFileName());
                 streamWriter.WriteLine(stackTrace.GetFrame(2).GetMethod().Name);
-                streamWriter.WriteLine(stackTrace.GetFrame(2).GetFileLineNumber());
+                streamWriter.WriteLine(stackTrace.GetFrame(2).GetFileLineNumber()-1);
                 streamWriter.WriteLine(stackValues);
             }
-
         }
 
         private string GetStackValues()
@@ -709,9 +708,7 @@ namespace Commentator
             var stackInfo = StackFieldInfo?.GetValue(this);
             if (stackInfo == null)
                 return "";
-            var stackValues = stackInfo.ToString().Remove(0, 1).Split(' ').Select(x => x.Remove(x.Length - 1)).ToArray();
-
-            return  String.Join(" ", stackValues);
+            return stackInfo.ToString();
         }
     }
 }

@@ -50,7 +50,7 @@ namespace Commentator
                         content.AppendLine(line);
                 }
 
-            File.AppendAllText(fileName, content.ToString());
+            File.WriteAllText(fileName, content.ToString());
         }
     }
 }
