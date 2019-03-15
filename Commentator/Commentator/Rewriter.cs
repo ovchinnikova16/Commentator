@@ -9,7 +9,7 @@ namespace Commentator
 {
     public class Rewriter
     {
-        private string root;
+        private readonly string root;
         private readonly string simpleClass = "GroboIL";
         private readonly string shellClass = "Commentator.GroboILCollector";
         public Rewriter(string projectPath)
@@ -19,8 +19,8 @@ namespace Commentator
 
         public void RewriteToShellName()
         {
-            string[] allfiles = Directory.GetFiles(root, "*.cs", SearchOption.AllDirectories);
-            foreach (var candidate in allfiles)
+            var allFiles = Directory.GetFiles(root, "*.cs", SearchOption.AllDirectories);
+            foreach (var candidate in allFiles)
             {
                 Console.WriteLine("TO_SHELL: " + candidate);
                 ReplaceShellNames(candidate, simpleClass, shellClass);
@@ -29,8 +29,8 @@ namespace Commentator
 
         public void RewriteFromShellName()
         {
-            var allfiles = Directory.GetFiles(root, "*.cs", SearchOption.AllDirectories);
-            foreach (var candidate in allfiles)
+            var allFiles = Directory.GetFiles(root, "*.cs", SearchOption.AllDirectories);
+            foreach (var candidate in allFiles)
             {
                 Console.WriteLine("FROM_SHELL: " + candidate);
                 ReplaceShellNames(candidate, shellClass, simpleClass);
@@ -40,19 +40,17 @@ namespace Commentator
         private void ReplaceShellNames(string fileName, string nameFrom, string nameTo)
         {
             var lines = File.ReadLines(fileName);
-            File.WriteAllText(fileName, string.Empty);
-			//review: ReadAllLines(), WriteAllLines()
+            var content = new StringBuilder();
 
             foreach (var line in lines)
                 {
-                    using (StreamWriter streamWriter = new StreamWriter(fileName, true))
-                    {
-                        if (line.Contains(nameFrom+" ") || !line.Contains(nameFrom+"C"))
-                            streamWriter.WriteLine(line.Replace(nameFrom, nameTo));
-                        else
-                            streamWriter.WriteLine(line);
-                    }
+                    if (line.Contains(nameFrom+" ") || !line.Contains(nameFrom+"C"))
+                        content.AppendLine(line.Replace(nameFrom, nameTo));
+                    else
+                        content.AppendLine(line);
                 }
+
+            File.AppendAllText(fileName, content.ToString());
         }
     }
 }

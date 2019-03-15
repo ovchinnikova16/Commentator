@@ -12,7 +12,7 @@ namespace Commentator
 {
     public class GroboILCollector : GroboIL
     {
-        private static readonly FieldInfo stackFieldInfo = typeof(GroboIL).GetField("stack", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo StackFieldInfo = typeof(GroboIL).GetField("stack", BindingFlags.NonPublic | BindingFlags.Instance);
 
         private string stackInfoFileName = @"C:\Users\e.ovc\Commentator\work\stackInfo.txt";
 
@@ -685,7 +685,7 @@ namespace Commentator
             Console.WriteLine(stackTrace);
             Console.WriteLine(stackTrace.GetFrame(2).GetFileName());
             Console.WriteLine(stackTrace.GetFrame(2).GetFileLineNumber());
-            Console.WriteLine(stackFieldInfo?.GetValue(this));
+            Console.WriteLine(StackFieldInfo?.GetValue(this));
         }
 
         private void SaveStackInfo()
@@ -706,7 +706,7 @@ namespace Commentator
 
         private string GetStackValues()
         {
-            var stackInfo = stackFieldInfo?.GetValue(this);
+            var stackInfo = StackFieldInfo?.GetValue(this);
             if (stackInfo == null)
                 return "";
             var stackValues = stackInfo.ToString().Remove(0, 1).Split(' ').Select(x => x.Remove(x.Length - 1)).ToArray();

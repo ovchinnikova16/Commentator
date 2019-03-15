@@ -8,7 +8,6 @@ namespace Commentator
 {
     public class Commentator
     {
-	    //review: зачем это в филдах?
         private readonly string logFile;
         private readonly string infoFile;
 
@@ -23,7 +22,7 @@ namespace Commentator
             var commentsByFile = new Dictionary<string, List<CommentInfo>>();
 
             try
-            {
+            { 
                 using (StreamReader streamReader = new StreamReader(infoFileName))
                 {
                     while (!streamReader.EndOfStream)
