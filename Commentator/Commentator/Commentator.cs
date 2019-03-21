@@ -96,7 +96,8 @@ namespace Commentator
 
             foreach (var line in lines)
             {
-                if (comments.ContainsKey(strNumber))
+
+                if (comments.ContainsKey(strNumber) && line.Contains("il."))
                     if (line.Contains("//"))
                     {
                         WriteCommentsLogFile(line, strNumber, targetFileName, comments);
@@ -128,7 +129,7 @@ namespace Commentator
                     streamWriter.WriteLine("String Number: "+strNumber);
                     streamWriter.WriteLine("String: "+str.Trim());
                     streamWriter.WriteLine("ExistingComment: "+comment);
-                    streamWriter.WriteLine("NewComment: ["+ string.Join(" ", comments[strNumber])+"]");
+                    streamWriter.WriteLine("NewComment: ["+ string.Join(", ", comments[strNumber])+"]");
                     streamWriter.WriteLine("");
             }
         }
@@ -159,6 +160,12 @@ namespace Commentator
         {
             var newStackValues = GetValuesFromStackString(stackInfo);
 
+            for (int i = 0; i < newStackValues.Length; i++) 
+            {
+                if (newStackValues[i].Contains("/") || newStackValues[i].Contains("Root"))
+                    newStackValues[i] = "Node";
+            }
+
             if (!methodMinStackLength.ContainsKey(methodName))
                 methodMinStackLength.Add(methodName, newStackValues.Length);
 
@@ -170,20 +177,43 @@ namespace Commentator
             }
 
             var currentStackValues = comments[stringNumber];
-            var len = Math.Min(newStackValues.Length, currentStackValues.Length);
-            var newStack = new string[len]; 
 
-            for (int i = len-1; i >= 0; i--)
-                if (currentStackValues[currentStackValues.Length - i - 1] !=
-                    newStackValues[newStackValues.Length - i - 1])
-                    newStack[len - i - 1] = "Object";
+            if (newStackValues.Length == currentStackValues.Length)
+            {
+                var len = Math.Min(newStackValues.Length, currentStackValues.Length);
+                var newStack = new string[len];
+
+                for (int i = len - 1; i >= 0; i--)
+                {
+                    var newV = newStackValues[newStackValues.Length - i - 1].Trim();
+                    var currentV = currentStackValues[currentStackValues.Length - i - 1].Trim();
+                    if (newV != currentV)
+                    {
+                        if (newV != "null" && !newV.Contains("Nullable") && currentV != "null" && !currentV.Contains("Nullable"))
+                            newStack[len - i - 1] = "Object";
+                        else
+                            if (newV != "null" && !newV.Contains("Nullable"))
+                                newStack[len - i - 1] = newV;
+                            else
+                                newStack[len - i - 1] = currentV;
+                    }
+                    else
+                        newStack[len - i - 1] = newV;
+                }
+
+                if (newStackValues.Length < methodMinStackLength[methodName])
+                    methodMinStackLength[methodName] = newStackValues.Length;
+
+                comments[stringNumber] = newStack;
+            }
+            else
+            {
+                if (newStackValues.Length > currentStackValues.Length)
+                    comments[stringNumber] = newStackValues;
                 else
-                    newStack[len - i - 1] = newStackValues[newStackValues.Length - i - 1];
+                    comments[stringNumber] = currentStackValues;
+            }
 
-            if (newStackValues.Length < methodMinStackLength[methodName])
-                methodMinStackLength[methodName] = newStackValues.Length;
-
-            comments[stringNumber] = newStack;
         }
 
         private string[] GetValuesFromStackString(string stackInfo)
@@ -204,8 +234,7 @@ namespace Commentator
                     content.Append(e);
                 }
             }
-
-            return content.ToString().Split('*').ToArray();
+            return content.ToString().Split('*').Where(x => x != "").ToArray();
         }
     }
     public class CommentInfo

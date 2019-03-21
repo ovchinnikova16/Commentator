@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Xml;
 using NUnit.Engine;
 
@@ -21,10 +22,13 @@ namespace Commentator
             var targetProjectPath2 = @"C:\Users\e.ovc\Commentator\project1\flash.props\PropertiesCollector.UnitTests";
             var targetProjectPath3 = @"C:\Users\e.ovc\Commentator\project1\flash.props\PropertiesCollector";
 
+            // зависимости
+            BuildTargetAssembly(helperPath);
+            BuildTargetAssembly(targetAssemblyPath);
+            Thread.Sleep(30000);
 
-            //var helperRewrite = new Rewriter(helperPath);
-            //helperRewrite.RewriteToShellName();
-            //BuildTargetAssembly(helperPath);
+            var helperRewrite = new Rewriter(helperPath);
+            helperRewrite.RewriteToShellName();
 
             var rewrite1 = new Rewriter(targetProjectPath1);
             rewrite1.RewriteToShellName();
@@ -33,12 +37,13 @@ namespace Commentator
             var rewrite3 = new Rewriter(targetProjectPath3);
             rewrite3.RewriteToShellName();
 
+            BuildTargetAssembly(helperPath);
             BuildTargetAssembly(targetAssemblyPath);
+            Thread.Sleep(30000);
 
             RunAllTests(targetAssemblyPath, infoFileName);
 
-            //helperRewrite.RewriteFromShellName();
-            //rewrite.RewriteFromShellName();
+            helperRewrite.RewriteFromShellName();
 
             rewrite1.RewriteFromShellName();
             rewrite2.RewriteFromShellName();
@@ -46,9 +51,10 @@ namespace Commentator
 
             AddCommentsToProject(infoFileName, targetAssemblyPath);
 
-            //BuildTargetAssembly(helperPath);
+            BuildTargetAssembly(helperPath);
             BuildTargetAssembly(targetAssemblyPath);
         }
+
 
         private static void BuildTargetAssembly(string targetAssemblyPath)
         {
