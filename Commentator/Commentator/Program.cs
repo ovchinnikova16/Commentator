@@ -23,36 +23,36 @@ namespace Commentator
             var targetProjectPath3 = @"C:\Users\e.ovc\Commentator\project1\flash.props\PropertiesCollector";
 
             // зависимости
-            BuildTargetAssembly(helperPath);
-            BuildTargetAssembly(targetAssemblyPath);
-            Thread.Sleep(30000);
+            //BuildTargetAssembly(helperPath);
+            //BuildTargetAssembly(targetAssemblyPath);
+            //Thread.Sleep(30000);
 
-            var helperRewrite = new Rewriter(helperPath);
-            helperRewrite.RewriteToShellName();
+            //var helperRewrite = new Rewriter(helperPath);
+            //helperRewrite.RewriteToShellName();
 
-            var rewrite1 = new Rewriter(targetProjectPath1);
-            rewrite1.RewriteToShellName();
-            var rewrite2 = new Rewriter(targetProjectPath2);
-            rewrite2.RewriteToShellName();
-            var rewrite3 = new Rewriter(targetProjectPath3);
-            rewrite3.RewriteToShellName();
+            //var rewrite1 = new Rewriter(targetProjectPath1);
+            //rewrite1.RewriteToShellName();
+            //var rewrite2 = new Rewriter(targetProjectPath2);
+            //rewrite2.RewriteToShellName();
+            //var rewrite3 = new Rewriter(targetProjectPath3);
+            //rewrite3.RewriteToShellName();
 
-            BuildTargetAssembly(helperPath);
-            BuildTargetAssembly(targetAssemblyPath);
-            Thread.Sleep(30000);
+            ////BuildTargetAssembly(helperPath);
+            //BuildTargetAssembly(targetAssemblyPath);
+            //Thread.Sleep(30000);
 
-            RunAllTests(targetAssemblyPath, infoFileName);
+            //RunAllTests(targetAssemblyPath, infoFileName);
 
-            helperRewrite.RewriteFromShellName();
+            ////helperRewrite.RewriteFromShellName();
 
-            rewrite1.RewriteFromShellName();
-            rewrite2.RewriteFromShellName();
-            rewrite3.RewriteFromShellName();
+            //rewrite1.RewriteFromShellName();
+            //rewrite2.RewriteFromShellName();
+            //rewrite3.RewriteFromShellName();
 
             AddCommentsToProject(infoFileName, targetAssemblyPath);
 
-            BuildTargetAssembly(helperPath);
-            BuildTargetAssembly(targetAssemblyPath);
+            ////BuildTargetAssembly(helperPath);
+            //BuildTargetAssembly(targetAssemblyPath);
         }
 
 

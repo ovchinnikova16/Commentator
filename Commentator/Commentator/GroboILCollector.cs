@@ -44,639 +44,745 @@ namespace Commentator
         {
         }
 
+
         public new void Stfld(FieldInfo field)
         {
+            var prevStackValues = GetStackValues();
             base.Stfld(field);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Seal()
         {
+            var prevStackValues = GetStackValues();
             base.Seal();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Dispose()
         {
+            var prevStackValues = GetStackValues();
             base.Dispose();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new string GetILCode()
         {
-            var value  = base.GetILCode();
-            SaveStackInfo();
+            var prevStackValues = GetStackValues();
+            var value = base.GetILCode();
+            SaveStackInfo(prevStackValues);
             return value;
         }
 
         public new GroboIL.Local DeclareLocal(Type localType, bool pinned = false)
         {
+            var prevStackValues = GetStackValues();
             var value = base.DeclareLocal(localType, pinned);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
             return value;
         }
 
         public new GroboIL.Label DefineLabel(string name, bool appendUniquePrefix = true)
         {
+            var prevStackValues = GetStackValues();
             var value = base.DefineLabel(name, appendUniquePrefix);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
             return value;
         }
 
         public new void MarkLabel(GroboIL.Label label)
         {
+            var prevStackValues = GetStackValues();
             base.MarkLabel(label);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void WriteLine(string str)
         {
+            var prevStackValues = GetStackValues();
             base.WriteLine(str);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void WriteLine(GroboIL.Local local)
         {
+            var prevStackValues = GetStackValues();
             base.WriteLine(local);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void MarkSequencePoint(ISymbolDocumentWriter document, int startLine, int startColumn, int endLine, int endColumn)
         {
+            var prevStackValues = GetStackValues();
             base.MarkSequencePoint(document, startLine, startColumn, endLine, endColumn);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         // public new static void MarkSequencePoint(ILGenerator il, ISymbolDocumentWriter document, int startLine, int startColumn, int endLine, int endColumn)
 
         public new void BeginExceptionBlock()
         {
+            var prevStackValues = GetStackValues();
             base.BeginExceptionBlock();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void BeginCatchBlock(Type exceptionType)
         {
+            var prevStackValues = GetStackValues();
             base.BeginCatchBlock(exceptionType);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void BeginExceptFilterBlock()
         {
+            var prevStackValues = GetStackValues();
             base.BeginExceptFilterBlock();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void BeginFaultBlock()
         {
+            var prevStackValues = GetStackValues();
             base.BeginFaultBlock();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void BeginFinallyBlock()
         {
+            var prevStackValues = GetStackValues();
             base.BeginFinallyBlock();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void EndExceptionBlock()
         {
+            var prevStackValues = GetStackValues();
             base.EndExceptionBlock();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Break()
         {
+            var prevStackValues = GetStackValues();
             base.Break();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Nop()
         {
+            var prevStackValues = GetStackValues();
             base.Nop();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Throw()
         {
+            var prevStackValues = GetStackValues();
             base.Throw();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Rethrow()
         {
+            var prevStackValues = GetStackValues();
             base.Rethrow();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Switch(params GroboIL.Label[] labels)
         {
+            var prevStackValues = GetStackValues();
             base.Switch(labels);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Ret()
         {
+            var prevStackValues = GetStackValues();
             base.Ret();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Leave(GroboIL.Label label)
         {
+            var prevStackValues = GetStackValues();
             base.Leave(label);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Jmp(MethodInfo method)
         {
+            var prevStackValues = GetStackValues();
             base.Jmp(method);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Br(GroboIL.Label label)
         {
+            var prevStackValues = GetStackValues();
             base.Br(label);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Brfalse(GroboIL.Label label)
         {
+            var prevStackValues = GetStackValues();
             base.Brfalse(label);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Brtrue(GroboIL.Label label)
         {
+            var prevStackValues = GetStackValues();
             base.Brtrue(label);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Ble(GroboIL.Label label, bool unsigned)
         {
+            var prevStackValues = GetStackValues();
             base.Ble(label, unsigned);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Bge(GroboIL.Label label, bool unsigned)
         {
+            var prevStackValues = GetStackValues();
             base.Bge(label, unsigned);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Blt(GroboIL.Label label, bool unsigned)
         {
+            var prevStackValues = GetStackValues();
             base.Blt(label, unsigned);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Bgt(GroboIL.Label label, bool unsigned)
         {
+            var prevStackValues = GetStackValues();
             base.Bgt(label, unsigned);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Bne_Un(GroboIL.Label label)
         {
+            var prevStackValues = GetStackValues();
             base.Bne_Un(label);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Beq(GroboIL.Label label)
         {
+            var prevStackValues = GetStackValues();
             base.Beq(label);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Ceq()
         {
+            var prevStackValues = GetStackValues();
             base.Ceq();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Cgt(bool unsigned)
         {
+            var prevStackValues = GetStackValues();
             base.Cgt(unsigned);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Clt(bool unsigned)
         {
+            var prevStackValues = GetStackValues();
             base.Clt(unsigned);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Pop()
         {
+            var prevStackValues = GetStackValues();
             base.Pop();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Dup()
         {
+            var prevStackValues = GetStackValues();
             base.Dup();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Ldloca(GroboIL.Local local)
         {
+            var prevStackValues = GetStackValues();
             base.Ldloca(local);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Ldloc(GroboIL.Local local)
         {
+            var prevStackValues = GetStackValues();
             base.Ldloc(local);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Stloc(GroboIL.Local local)
         {
+            var prevStackValues = GetStackValues();
             base.Stloc(local);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Ldnull()
         {
+            var prevStackValues = GetStackValues();
             base.Ldnull();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Initobj(Type type)
         {
+            var prevStackValues = GetStackValues();
             base.Initobj(type);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Cpobj(Type type)
         {
+            var prevStackValues = GetStackValues();
             base.Cpobj(type);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Ldarg(int index)
         {
+            var prevStackValues = GetStackValues();
             base.Ldarg(index);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Starg(int index)
         {
+            var prevStackValues = GetStackValues();
             base.Starg(index);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Ldarga(int index)
         {
+            var prevStackValues = GetStackValues();
             base.Ldarga(index);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Arglist()
         {
+            var prevStackValues = GetStackValues();
             base.Arglist();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Ldc_I4(int value)
         {
+            var prevStackValues = GetStackValues();
             base.Ldc_I4(value);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Ldc_I8(long value)
         {
+            var prevStackValues = GetStackValues();
             base.Ldc_I8(value);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Ldc_R4(float value)
         {
+            var prevStackValues = GetStackValues();
             base.Ldc_R4(value);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Ldc_R8(double value)
         {
+            var prevStackValues = GetStackValues();
             base.Ldc_R8(value);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Ldc_IntPtr(IntPtr value)
         {
+            var prevStackValues = GetStackValues();
             base.Ldc_IntPtr(value);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void FreePinnedLocal(GroboIL.Local local)
         {
+            var prevStackValues = GetStackValues();
             base.FreePinnedLocal(local);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Ldlen()
         {
+            var prevStackValues = GetStackValues();
             base.Ldlen();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Ldftn(MethodInfo method)
         {
+            var prevStackValues = GetStackValues();
             base.Ldftn(method);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Ldvirtftn(MethodInfo method)
         {
+            var prevStackValues = GetStackValues();
             base.Ldvirtftn(method);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Stfld(FieldInfo field, bool isVolatile = false, int? unaligned = null)
         {
+            var prevStackValues = GetStackValues();
             base.Stfld(field, isVolatile, unaligned);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Ldfld(FieldInfo field, bool isVolatile = false, int? unaligned = null)
         {
+            var prevStackValues = GetStackValues();
             base.Ldfld(field, isVolatile, unaligned);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Ldflda(FieldInfo field)
         {
+            var prevStackValues = GetStackValues();
             base.Ldflda(field);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Ldelema(Type elementType, bool asReadonly = false)
         {
+            var prevStackValues = GetStackValues();
             base.Ldelema(elementType, asReadonly);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Ldelem(Type elementType)
         {
+            var prevStackValues = GetStackValues();
             base.Ldelem(elementType);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Stelem(Type elementType)
         {
+            var prevStackValues = GetStackValues();
             base.Stelem(elementType);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Stind(Type type, bool isVolatile = false, int? unaligned = null)
         {
+            var prevStackValues = GetStackValues();
             base.Stind(type, isVolatile, unaligned);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Ldind(Type type, bool isVolatile = false, int? unaligned = null)
         {
+            var prevStackValues = GetStackValues();
             base.Ldind(type, isVolatile, unaligned);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Cpblk(bool isVolatile = false, int? unaligned = null)
         {
+            var prevStackValues = GetStackValues();
             base.Cpblk(isVolatile, unaligned);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Initblk(bool isVolatile = false, int? unaligned = null)
         {
+            var prevStackValues = GetStackValues();
             base.Initblk(isVolatile, unaligned);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Ldtoken(Type type)
         {
+            var prevStackValues = GetStackValues();
             base.Ldtoken(type);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Ldtoken(MethodInfo method)
         {
+            var prevStackValues = GetStackValues();
             base.Ldtoken(method);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Ldtoken(FieldInfo field)
         {
+            var prevStackValues = GetStackValues();
             base.Ldtoken(field);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Castclass(Type type)
         {
+            var prevStackValues = GetStackValues();
             base.Castclass(type);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Isinst(Type type)
         {
+            var prevStackValues = GetStackValues();
             base.Isinst(type);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Unbox_Any(Type type)
         {
+            var prevStackValues = GetStackValues();
             base.Unbox_Any(type);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Box(Type type)
         {
+            var prevStackValues = GetStackValues();
             base.Box(type);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Stobj(Type type, bool isVolatile = false, int? unaligned = null)
         {
+            var prevStackValues = GetStackValues();
             base.Stobj(type, isVolatile, unaligned);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Ldobj(Type type, bool isVolatile = false, int? unaligned = null)
         {
+            var prevStackValues = GetStackValues();
             base.Ldobj(type, isVolatile, unaligned);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Newobj(ConstructorInfo constructor)
         {
+            var prevStackValues = GetStackValues();
             base.Newobj(constructor);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Newarr(Type type)
         {
+            var prevStackValues = GetStackValues();
             base.Newarr(type);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Ckfinite()
         {
+            var prevStackValues = GetStackValues();
             base.Ckfinite();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void And()
         {
+            var prevStackValues = GetStackValues();
             base.And();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Or()
         {
+            var prevStackValues = GetStackValues();
             base.Or();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Xor()
         {
+            var prevStackValues = GetStackValues();
             base.Xor();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Add()
         {
+            var prevStackValues = GetStackValues();
             base.Add();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Add_Ovf(bool unsigned)
         {
+            var prevStackValues = GetStackValues();
             base.Add_Ovf(unsigned);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Sub()
         {
+            var prevStackValues = GetStackValues();
             base.Sub();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Sub_Ovf(bool unsigned)
         {
+            var prevStackValues = GetStackValues();
             base.Sub_Ovf(unsigned);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Mul()
         {
+            var prevStackValues = GetStackValues();
             base.Mul();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Mul_Ovf(bool unsigned)
         {
+            var prevStackValues = GetStackValues();
             base.Mul_Ovf(unsigned);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Div(bool unsigned)
         {
+            var prevStackValues = GetStackValues();
             base.Div(unsigned);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Rem(bool unsigned)
         {
+            var prevStackValues = GetStackValues();
             base.Rem(unsigned);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Shl()
         {
+            var prevStackValues = GetStackValues();
             base.Shl();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Shr(bool unsigned)
         {
+            var prevStackValues = GetStackValues();
             base.Shr(unsigned);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Neg()
         {
+            var prevStackValues = GetStackValues();
             base.Neg();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Not()
         {
+            var prevStackValues = GetStackValues();
             base.Not();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Ldstr(string value)
         {
+            var prevStackValues = GetStackValues();
             base.Ldstr(value);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Conv<T>()
         {
+            var prevStackValues = GetStackValues();
             base.Conv<T>();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Conv_R_Un()
         {
+            var prevStackValues = GetStackValues();
             base.Conv_R_Un();
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Conv_Ovf<T>(bool unsigned)
         {
+            var prevStackValues = GetStackValues();
             base.Conv_Ovf<T>(unsigned);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Call(MethodInfo method, Type constrained = null, bool tailcall = false, Type[] optionalParameterTypes = null, bool isVirtual = false)
         {
+            var prevStackValues = GetStackValues();
             base.Call(method, constrained, tailcall, optionalParameterTypes, isVirtual);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Call(ConstructorInfo constructor)
         {
+            var prevStackValues = GetStackValues();
             base.Call(constructor);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void SafeCall(MethodInfo method, Type constrained = null, bool tailcall = false, Type[] optionalParameterTypes = null, bool isVirtual = false)
         {
+            var prevStackValues = GetStackValues();
             base.Call(method, constrained, tailcall, optionalParameterTypes, isVirtual);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void SafeCall(ConstructorInfo constructor)
         {
+            var prevStackValues = GetStackValues();
             base.Call(constructor);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Callnonvirt(MethodInfo method, bool tailcall = false, Type[] optionalParameterTypes = null)
         {
+            var prevStackValues = GetStackValues();
             base.Callnonvirt(method, tailcall, optionalParameterTypes);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Calli(CallingConventions callingConvention, Type returnType, Type[] parameterTypes, bool tailcall = false, Type[] optionalParameterTypes = null)
         {
+            var prevStackValues = GetStackValues();
             base.Calli(callingConvention, returnType, parameterTypes, tailcall, optionalParameterTypes);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         public new void Calli(CallingConvention callingConvention, Type returnType, Type[] parameterTypes)
         {
+            var prevStackValues = GetStackValues();
             base.Calli(callingConvention, returnType, parameterTypes);
-            SaveStackInfo();
+            SaveStackInfo(prevStackValues);
         }
 
         private void PrintStackInfo()
@@ -688,7 +794,7 @@ namespace Commentator
             Console.WriteLine(StackFieldInfo?.GetValue(this));
         }
 
-        private void SaveStackInfo()
+        private void SaveStackInfo(string prevStackValues)
         {
             var stackTrace = new StackTrace(true);
             var stackValues = GetStackValues();
@@ -699,6 +805,7 @@ namespace Commentator
                 streamWriter.WriteLine(stackTrace.GetFrame(2).GetFileName());
                 streamWriter.WriteLine(stackTrace.GetFrame(2).GetMethod().Name);
                 streamWriter.WriteLine(stackTrace.GetFrame(2).GetFileLineNumber()-1);
+                streamWriter.WriteLine(prevStackValues);
                 streamWriter.WriteLine(stackValues);
             }
         }
