@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Mono.Cecil.Cil;
-using NUnit.Framework.Constraints;
 
 namespace Commentator
 {
@@ -13,6 +11,7 @@ namespace Commentator
         private readonly string logFile;
         private readonly string infoFile;
         private readonly string projectName;
+        private int prevInfoFileStrNumber = 0;
 
         public Commentator(string infoFileName, string projectName)
         {
@@ -145,8 +144,6 @@ namespace Commentator
                 
                 foreach (var strNumber in e.Value)
                 {
-                    if (lines[strNumber-1].Contains("il.Ldarg(0)"))
-                        comments[strNumber][comments[strNumber].Length - 1] = "this";
                     for (int i = 0; i < Math.Min(stackHeadByLine[strNumber], prevStack.Length); i++)
                     {
                         if (prevStack[i] == "this")
@@ -205,6 +202,9 @@ namespace Commentator
             Dictionary<int, string> methodNameByNumber, 
             Dictionary<int, int> stackHeadByLine)
         {
+            if (prevInfoFileStrNumber == commentInfo.StringNumber) commentInfo.StringNumber++;
+            prevInfoFileStrNumber = commentInfo.StringNumber;
+
             var newStackValues = GetValuesFromStackString(commentInfo.StackInfo);
 
             var prevStackValues = GetValuesFromStackString(commentInfo.PrevStackInfo);
@@ -244,7 +244,7 @@ namespace Commentator
             }
             else
             {
-                if (newStackValues.Length < currentStackValues.Length)
+                if (newStackValues.Length > currentStackValues.Length)
                     comments[commentInfo.StringNumber] = newStackValues;
                 else
                     comments[commentInfo.StringNumber] = currentStackValues;
@@ -302,7 +302,7 @@ namespace Commentator
     {
         public string FileName { get; }
         public string MethodName { get; }
-        public int StringNumber { get; }
+        public int StringNumber { get; set; }
         public string StackInfo { get; }
         public string PrevStackInfo { get; }
 
