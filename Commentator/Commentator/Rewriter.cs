@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace Commentator
@@ -46,8 +47,7 @@ namespace Commentator
                     else
                         content.AppendLine(line);
                 }
-
-            File.WriteAllText(fileName, content.ToString());
+            File.WriteAllText(fileName, content.ToString().Trim(),Encoding.UTF8);
         }
     }
 }

@@ -18,9 +18,7 @@ namespace Commentator
             var infoFileName = @"C:\Users\e.ovc\Commentator\work\stackInfo.txt";
             var targetAssemblyPath = @"C:\Users\e.ovc\Commentator\project1\flash.props";
             var helperPath = @"C:\Users\e.ovc\Commentator\project1\RequisitesReader";
-            var targetProjectPath1 = @"C:\Users\e.ovc\Commentator\project1\flash.props\PropertiesCollector.Benchmarks";
-            var targetProjectPath2 = @"C:\Users\e.ovc\Commentator\project1\flash.props\PropertiesCollector.UnitTests";
-            var targetProjectPath3 = @"C:\Users\e.ovc\Commentator\project1\flash.props\PropertiesCollector";
+            var targetProjectPath = @"C:\Users\e.ovc\Commentator\project1\flash.props\PropertiesCollector";
 
             BuildTargetAssembly(helperPath);
             BuildTargetAssembly(targetAssemblyPath);
@@ -28,12 +26,8 @@ namespace Commentator
             var helperRewrite = new Rewriter(helperPath);
             helperRewrite.RewriteToShellName();
 
-            var rewrite1 = new Rewriter(targetProjectPath1);
-            rewrite1.RewriteToShellName();
-            var rewrite2 = new Rewriter(targetProjectPath2);
-            rewrite2.RewriteToShellName();
-            var rewrite3 = new Rewriter(targetProjectPath3);
-            rewrite3.RewriteToShellName();
+            var rewrite = new Rewriter(targetAssemblyPath);
+            rewrite.RewriteToShellName();
 
             BuildTargetAssembly(helperPath);
             BuildTargetAssembly(targetAssemblyPath);
@@ -42,11 +36,9 @@ namespace Commentator
 
             helperRewrite.RewriteFromShellName();
 
-            rewrite1.RewriteFromShellName();
-            rewrite2.RewriteFromShellName();
-            rewrite3.RewriteFromShellName();
+            rewrite.RewriteFromShellName();
 
-            AddCommentsToProject(infoFileName, targetAssemblyPath);
+            AddCommentsToProject(infoFileName, targetProjectPath);
 
             BuildTargetAssembly(helperPath);
             BuildTargetAssembly(targetAssemblyPath);
@@ -72,7 +64,7 @@ namespace Commentator
             File.WriteAllText(infoFileName, string.Empty);
             ITestEngine engine = TestEngineActivator.CreateInstance();
             var allFiles = Directory
-                .GetFiles(targetProjectPath, "*UnitTest*.dll", SearchOption.AllDirectories)
+                .GetFiles(targetProjectPath, "*Test*.dll", SearchOption.AllDirectories)
                 .Where(x => x.Contains("Release"))
                 .ToArray();
             foreach (var candidate in allFiles)

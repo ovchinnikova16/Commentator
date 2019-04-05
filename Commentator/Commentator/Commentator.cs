@@ -118,7 +118,7 @@ namespace Commentator
                 strNumber++;
             }
 
-            File.WriteAllText(targetFileName, content.ToString());
+            File.WriteAllText(targetFileName, content.ToString(), Encoding.UTF8);
         }
 
         private void ReplaceThisStackElements(
