@@ -907,19 +907,10 @@ namespace Commentator
             var newStackValues = GetStackValues();
             SaveStackInfo(prevStackValues, newStackValues);
         }
-        private void PrintStackInfo()
-        {
-            var stackTrace = new StackTrace(true);
-            Console.WriteLine(stackTrace);
-            Console.WriteLine(stackTrace.GetFrame(2).GetFileName());
-            Console.WriteLine(stackTrace.GetFrame(2).GetFileLineNumber());
-            Console.WriteLine(StackFieldInfo?.GetValue(this));
-        }
 
         private void SaveStackInfo(string prevStackValues, string newStackValues)
         {
             var stackTrace = new StackTrace(true);
-            if (string.IsNullOrEmpty(newStackValues) || newStackValues.Length < 2) return;
 
             var sB = new StringBuilder();
             sB.AppendLine(stackTrace.GetFrame(2).GetFileName());

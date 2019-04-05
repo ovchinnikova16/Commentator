@@ -35,7 +35,7 @@ namespace Commentator
 
                 foreach (var commentInfo in commentsByFile[file.Key])
                 {
-                    AddNewComment(
+                    AddNewCommentToComments(
                         commentInfo, 
                         comments, 
                         methodMinStackLength, 
@@ -145,13 +145,12 @@ namespace Commentator
                 foreach (var strNumber in e.Value)
                 {
                     for (int i = 0; i < Math.Min(stackHeadByLine[strNumber], prevStack.Length); i++)
-                    {
                         if (prevStack[i] == "this")
                             comments[strNumber][i] = "this";
-                    }
 
-                    if (lines[strNumber - 1].Contains("Dup()") && comments[strNumber][comments[strNumber].Length - 2] == "this")
-                        comments[strNumber][comments[strNumber].Length - 1] = "this";
+                    var stackLen = comments[strNumber].Length;
+                    if (lines[strNumber - 1].Contains("Dup()") && comments[strNumber][stackLen - 2] == "this")
+                        comments[strNumber][stackLen - 1] = "this";
 
                     prevStack = comments[strNumber];
                 }
@@ -195,7 +194,7 @@ namespace Commentator
             return stackString;
         }
 
-        private void AddNewComment(
+        private void AddNewCommentToComments(
             CommentInfo commentInfo,
             Dictionary<int, string[]> comments,
             Dictionary<string, int> methodMinStackLength,
@@ -206,20 +205,9 @@ namespace Commentator
             prevInfoFileStrNumber = commentInfo.StringNumber;
 
             var newStackValues = GetValuesFromStackString(commentInfo.StackInfo);
-
             var prevStackValues = GetValuesFromStackString(commentInfo.PrevStackInfo);
 
-            var headLength = 0; 
-            for (int i = 0; i < Math.Min(newStackValues.Length, prevStackValues.Length); i++)
-            {
-                if (newStackValues[i] == prevStackValues[i])
-                    headLength++;
-            }
-
-            if (!stackHeadByLine.ContainsKey(commentInfo.StringNumber))
-                stackHeadByLine.Add(commentInfo.StringNumber, headLength);
-            if (headLength < stackHeadByLine[commentInfo.StringNumber])
-                stackHeadByLine[commentInfo.StringNumber] = headLength;
+            UpdateStackHead(commentInfo, stackHeadByLine, newStackValues, prevStackValues);
 
             if (!methodMinStackLength.ContainsKey(commentInfo.MethodName))
                 methodMinStackLength.Add(commentInfo.MethodName, newStackValues.Length);
@@ -231,8 +219,13 @@ namespace Commentator
                 return;
             }
 
-            var currentStackValues = comments[commentInfo.StringNumber];
+            UpdateCommentStackValues(commentInfo, comments, methodMinStackLength, newStackValues);
+        }
 
+        private static void UpdateCommentStackValues(CommentInfo commentInfo, Dictionary<int, string[]> comments,
+            Dictionary<string, int> methodMinStackLength, string[] newStackValues)
+        {
+            var currentStackValues = comments[commentInfo.StringNumber];
             if (newStackValues.Length == currentStackValues.Length)
             {
                 var newStack = MergeStackValues(newStackValues, currentStackValues);
@@ -249,7 +242,25 @@ namespace Commentator
                 else
                     comments[commentInfo.StringNumber] = currentStackValues;
             }
+        }
 
+        private static void UpdateStackHead(
+            CommentInfo commentInfo, 
+            Dictionary<int, int> stackHeadByLine, 
+            string[] newStackValues,
+            string[] prevStackValues)
+        {
+            var headLength = 0;
+            for (int i = 0; i < Math.Min(newStackValues.Length, prevStackValues.Length); i++)
+            {
+                if (newStackValues[i] == prevStackValues[i])
+                    headLength++;
+            }
+
+            if (!stackHeadByLine.ContainsKey(commentInfo.StringNumber))
+                stackHeadByLine.Add(commentInfo.StringNumber, headLength);
+            if (headLength < stackHeadByLine[commentInfo.StringNumber])
+                stackHeadByLine[commentInfo.StringNumber] = headLength;
         }
 
         private static string[] MergeStackValues(string[] newStackValues, string[] currentStackValues)
@@ -288,7 +299,7 @@ namespace Commentator
                 if (counter == 0)
                 {
                     if (e == ' ') content.Append('*');
-                    if (e != ',' && e != '[' && e != ']') content.Append(e);
+                    if (e != ',') content.Append(e);
                 }
                 else
                 {

@@ -24,7 +24,6 @@ namespace Commentator
 
             BuildTargetAssembly(helperPath);
             BuildTargetAssembly(targetAssemblyPath);
-            Thread.Sleep(30000);
 
             var helperRewrite = new Rewriter(helperPath);
             helperRewrite.RewriteToShellName();
@@ -38,7 +37,6 @@ namespace Commentator
 
             BuildTargetAssembly(helperPath);
             BuildTargetAssembly(targetAssemblyPath);
-            Thread.Sleep(30000);
 
             RunAllTests(targetAssemblyPath, infoFileName);
 
@@ -66,13 +64,17 @@ namespace Commentator
                                   + " && cm build";
             process.StartInfo = startInfo;
             process.Start();
+            process.WaitForExit();
         }
 
         private static void RunAllTests(string targetProjectPath, string infoFileName)
         {
             File.WriteAllText(infoFileName, string.Empty);
             ITestEngine engine = TestEngineActivator.CreateInstance();
-            var allFiles = Directory.GetFiles(targetProjectPath, "*UnitTest*.dll", SearchOption.AllDirectories).Where(x => x.Contains("Release")).ToArray();
+            var allFiles = Directory
+                .GetFiles(targetProjectPath, "*UnitTest*.dll", SearchOption.AllDirectories)
+                .Where(x => x.Contains("Release"))
+                .ToArray();
             foreach (var candidate in allFiles)
             {
                 Console.WriteLine("RUN_TESTS: "+Path.GetFileName(candidate));
