@@ -52,6 +52,7 @@ namespace Commentator
             var commentsByFile = new Dictionary<string, List<CommentInfo>>();
             var prevStrNumber = 0;
             var prevMethodName = "";
+            var shift = 0;
 
             try
             {
@@ -66,8 +67,6 @@ namespace Commentator
                         var stackInfo = streamReader.ReadLine();
 
                         if (int.TryParse(stringNumber, out var number) &&
-                            !string.IsNullOrEmpty(stackInfo) &&
-                            stackInfo.Length > 1 &&
                             !string.IsNullOrEmpty(file) &&
                             file.StartsWith(projectName))
                         {
@@ -77,11 +76,15 @@ namespace Commentator
                             if (prevStrNumber == number && prevMethodName == methodName)
                             {
                                 prevStrNumber = number;
-                                number++;
+                                number += shift;
+                                shift++;
+                                if (shift > 2)
+                                    continue;
                             }
                             else
                             {
                                 prevStrNumber = number;
+                                shift = 1;
                             } 
 
                             commentsByFile[file]
