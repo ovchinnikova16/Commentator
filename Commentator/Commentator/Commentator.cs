@@ -50,9 +50,6 @@ namespace Commentator
         private Dictionary<string, List<CommentInfo>> GetCommentsInfoFromFile(string infoFileName)
         {
             var commentsByFile = new Dictionary<string, List<CommentInfo>>();
-            var prevStrNumber = 0;
-            var prevMethodName = "";
-            var shift = 0;
 
             try
             {
@@ -73,24 +70,8 @@ namespace Commentator
                             if (!commentsByFile.ContainsKey(file))
                                 commentsByFile.Add(file, new List<CommentInfo>());
 
-                            if (prevStrNumber == number && prevMethodName == methodName)
-                            {
-                                prevStrNumber = number;
-                                number += shift;
-                                shift++;
-                                if (shift > 2)
-                                    continue;
-                            }
-                            else
-                            {
-                                prevStrNumber = number;
-                                shift = 1;
-                            } 
-
                             commentsByFile[file]
                                 .Add(new CommentInfo(file, methodName, number, prevStackInfo, stackInfo));
-
-                            prevMethodName = methodName;
                         }
                     }
                 }
@@ -119,7 +100,7 @@ namespace Commentator
             foreach (var line in lines)
             {
 
-                if (comments.ContainsKey(strNumber) && line.Contains("il."))
+                if (comments.ContainsKey(strNumber))
                 {
                     if (line.Contains("//"))
                     {
@@ -127,9 +108,11 @@ namespace Commentator
                         content.AppendLine(line);
                     }
                     else
+                    {
                         content.AppendLine(string.Format("{0} // [{1}]", line,
                             GetStackStringFromValues(strNumber, comments, methodMinStackLength, methodNameByNumber,
                                 stackHeadByLine)));
+                    }
                 }
                 else
                     content.AppendLine(line);

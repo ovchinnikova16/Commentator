@@ -912,7 +912,7 @@ namespace Commentator
             var sB = new StringBuilder();
             sB.AppendLine(stackTrace.GetFrame(2).GetFileName());
             sB.AppendLine(stackTrace.GetFrame(2).GetMethod().Name);
-            sB.AppendLine((stackTrace.GetFrame(2).GetFileLineNumber() - 1).ToString());
+            sB.AppendLine((stackTrace.GetFrame(2).GetFileLineNumber()).ToString());
             sB.AppendLine(prevStackValues);
             sB.AppendLine(newStackValues);
             File.AppendAllText(stackInfoFileName, sB.ToString());

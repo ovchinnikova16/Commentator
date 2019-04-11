@@ -20,13 +20,13 @@ namespace Commentator
             //var targetProjectPath = @"C:\Users\e.ovc\Commentator\project1\flash.props\PropertiesCollector";
             //var targetAssemblyPath = @"C:\Users\e.ovc\Commentator\project1\flash.props";
 
-            //var rewrite = new Rewriter(targetAssemblyPath);
-            //rewrite.RewriteToShellName();
-            //BuildTargetAssembly(targetAssemblyPath);
+            var rewrite = new Rewriter(targetAssemblyPath);
+            rewrite.RewriteToShellName();
+            BuildTargetAssembly(targetAssemblyPath);
 
-            //RunAllTests(targetAssemblyPath, infoFileName);
+            RunAllTests(targetAssemblyPath, infoFileName);
 
-            //rewrite.RewriteFromShellName();
+            rewrite.RewriteFromShellName();
 
             AddCommentsToProject(infoFileName, targetAssemblyPath);
             //BuildTargetAssembly(targetAssemblyPath);
@@ -36,12 +36,11 @@ namespace Commentator
         private static void BuildTargetAssembly(string targetAssemblyPath)
         {
             Process process = new Process();
-	        //review: можно сеттить филды при создании
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.FileName = "cmd.exe";
             startInfo.Arguments = @"/c cd "
-                                  + targetAssemblyPath
-                                  + " && cm build";
+                                  + @"C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\MSBuild\15.0\Bin"
+                                  + @" && MSBuild.exe C:\Users\e.ovc\Commentator\project1\RequisitesReader\RequisitesReader.sln -property:Configuration=Debug";
             process.StartInfo = startInfo;
             process.Start();
             process.WaitForExit();
@@ -53,7 +52,7 @@ namespace Commentator
             ITestEngine engine = TestEngineActivator.CreateInstance();
             var allFiles = Directory
                 .GetFiles(targetProjectPath, "*Test*.dll", SearchOption.AllDirectories)
-                .Where(x => x.Contains("Release"))
+                .Where(x => x.Contains("Debug"))
                 .ToArray();
             foreach (var candidate in allFiles)
             {
