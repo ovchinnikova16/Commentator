@@ -51,9 +51,6 @@ namespace Commentator
             isStatic = constructor.IsStatic;
         }
 
-
-
-
         public new void Stfld(FieldInfo field)
         {
             var prevStackValues = GetStackValues();

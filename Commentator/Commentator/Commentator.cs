@@ -11,7 +11,6 @@ namespace Commentator
         private readonly string logFile;
         private readonly string infoFile;
         private readonly string projectName;
-        private int prevInfoFileStrNumber = 0;
 
         public Commentator(string infoFileName, string projectName)
         {
@@ -51,6 +50,8 @@ namespace Commentator
         private Dictionary<string, List<CommentInfo>> GetCommentsInfoFromFile(string infoFileName)
         {
             var commentsByFile = new Dictionary<string, List<CommentInfo>>();
+            var prevStrNumber = 0;
+            var prevMethodName = "";
 
             try
             {
@@ -72,7 +73,21 @@ namespace Commentator
                         {
                             if (!commentsByFile.ContainsKey(file))
                                 commentsByFile.Add(file, new List<CommentInfo>());
-                            commentsByFile[file].Add(new CommentInfo(file, methodName, number, prevStackInfo, stackInfo));
+
+                            if (prevStrNumber == number && prevMethodName == methodName)
+                            {
+                                prevStrNumber = number;
+                                number++;
+                            }
+                            else
+                            {
+                                prevStrNumber = number;
+                            } 
+
+                            commentsByFile[file]
+                                .Add(new CommentInfo(file, methodName, number, prevStackInfo, stackInfo));
+
+                            prevMethodName = methodName;
                         }
                     }
                 }
@@ -201,8 +216,6 @@ namespace Commentator
             Dictionary<int, string> methodNameByNumber, 
             Dictionary<int, int> stackHeadByLine)
         {
-            if (prevInfoFileStrNumber == commentInfo.StringNumber) commentInfo.StringNumber++;
-            prevInfoFileStrNumber = commentInfo.StringNumber;
 
             var newStackValues = GetValuesFromStackString(commentInfo.StackInfo);
             var prevStackValues = GetValuesFromStackString(commentInfo.PrevStackInfo);

@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Xml;
 using NUnit.Engine;
 
@@ -12,36 +11,25 @@ namespace Commentator
     {
         static void Main(string[] args)
         {
-            //string targetFileName = args[0];
-            //string infoFileName = args[1];
+            //string command = args[0];
+            //string targetAssemblyPath = args[1];
 
             var infoFileName = @"C:\Users\e.ovc\Commentator\work\stackInfo.txt";
-            var targetAssemblyPath = @"C:\Users\e.ovc\Commentator\project1\flash.props";
-            var helperPath = @"C:\Users\e.ovc\Commentator\project1\RequisitesReader";
-            var targetProjectPath = @"C:\Users\e.ovc\Commentator\project1\flash.props\PropertiesCollector";
 
-            BuildTargetAssembly(helperPath);
-            BuildTargetAssembly(targetAssemblyPath);
+            var targetAssemblyPath = @"C:\Users\e.ovc\Commentator\project1\RequisitesReader";
+            //var targetProjectPath = @"C:\Users\e.ovc\Commentator\project1\flash.props\PropertiesCollector";
+            //var targetAssemblyPath = @"C:\Users\e.ovc\Commentator\project1\flash.props";
 
-            var helperRewrite = new Rewriter(helperPath);
-            helperRewrite.RewriteToShellName();
+            //var rewrite = new Rewriter(targetAssemblyPath);
+            //rewrite.RewriteToShellName();
+            //BuildTargetAssembly(targetAssemblyPath);
 
-            var rewrite = new Rewriter(targetAssemblyPath);
-            rewrite.RewriteToShellName();
+            //RunAllTests(targetAssemblyPath, infoFileName);
 
-            BuildTargetAssembly(helperPath);
-            BuildTargetAssembly(targetAssemblyPath);
+            //rewrite.RewriteFromShellName();
 
-            RunAllTests(targetAssemblyPath, infoFileName);
-
-            helperRewrite.RewriteFromShellName();
-
-            rewrite.RewriteFromShellName();
-
-            AddCommentsToProject(infoFileName, targetProjectPath);
-
-            BuildTargetAssembly(helperPath);
-            BuildTargetAssembly(targetAssemblyPath);
+            AddCommentsToProject(infoFileName, targetAssemblyPath);
+            //BuildTargetAssembly(targetAssemblyPath);
         }
 
 
