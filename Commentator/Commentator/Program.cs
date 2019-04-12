@@ -15,32 +15,36 @@ namespace Commentator
             //string targetAssemblyPath = args[1];
 
             var infoFileName = @"C:\Users\e.ovc\Commentator\work\stackInfo.txt";
-
-            var targetAssemblyPath = @"C:\Users\e.ovc\Commentator\project1\RequisitesReader";
+            var msbuildPath = @"C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\MSBuild\15.0\Bin";
+            var targetAssembly = @"C:\Users\e.ovc\Commentator\project1\RequisitesReader\RequisitesReader.sln";
             //var targetProjectPath = @"C:\Users\e.ovc\Commentator\project1\flash.props\PropertiesCollector";
             //var targetAssemblyPath = @"C:\Users\e.ovc\Commentator\project1\flash.props";
 
+            var targetAssemblyPath = Path.GetDirectoryName(targetAssembly);
+
             var rewrite = new Rewriter(targetAssemblyPath);
             rewrite.RewriteToShellName();
-            BuildTargetAssembly(targetAssemblyPath);
+            BuildTargetAssembly(targetAssembly, msbuildPath);
 
             RunAllTests(targetAssemblyPath, infoFileName);
 
             rewrite.RewriteFromShellName();
 
             AddCommentsToProject(infoFileName, targetAssemblyPath);
-            //BuildTargetAssembly(targetAssemblyPath);
+            BuildTargetAssembly(targetAssembly, msbuildPath);
         }
 
 
-        private static void BuildTargetAssembly(string targetAssemblyPath)
+        private static void BuildTargetAssembly(string targetAssembly, string msbuildPath)
         {
             Process process = new Process();
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.FileName = "cmd.exe";
             startInfo.Arguments = @"/c cd "
-                                  + @"C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\MSBuild\15.0\Bin"
-                                  + @" && MSBuild.exe C:\Users\e.ovc\Commentator\project1\RequisitesReader\RequisitesReader.sln -property:Configuration=Debug";
+                                  + msbuildPath
+                                  + @" && MSBuild.exe " 
+                                  + targetAssembly 
+                                  + " -property:Configuration=Debug";
             process.StartInfo = startInfo;
             process.Start();
             process.WaitForExit();

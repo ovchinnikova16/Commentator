@@ -28,7 +28,7 @@ namespace Commentator
             foreach (var file in commentsByFile)
             {
                 var comments = new Dictionary<int, string[]>();
-                var methodMinStackLength = new Dictionary<string, int>();
+                var methodMinStackHead = new Dictionary<string, int>();
                 var methodNameByNumber = new Dictionary<int, string>();
                 var stackHeadByLine = new Dictionary<int, int>();
 
@@ -37,12 +37,12 @@ namespace Commentator
                     AddNewCommentToComments(
                         commentInfo, 
                         comments, 
-                        methodMinStackLength, 
+                        methodMinStackHead, 
                         methodNameByNumber, 
                         stackHeadByLine);
                 }
 
-                RewriteFileWithComments(file.Key, comments, methodNameByNumber, methodMinStackLength, stackHeadByLine);
+                RewriteFileWithComments(file.Key, comments, methodNameByNumber, methodMinStackHead, stackHeadByLine);
                 Console.WriteLine("COMMENT: "+file.Key);
             }
         }
@@ -88,7 +88,7 @@ namespace Commentator
             string targetFileName, 
             Dictionary<int, string[]> comments, 
             Dictionary<int, string> methodNameByNumber, 
-            Dictionary<string, int> methodMinStackLength,
+            Dictionary<string, int> methodMinStackHead,
             Dictionary<int, int> stackHeadByLine)
         {
             var strNumber = 1;
@@ -102,16 +102,20 @@ namespace Commentator
 
                 if (comments.ContainsKey(strNumber))
                 {
+                    var comment = GetStackStringFromValues(
+                        strNumber,
+                        comments,
+                        methodMinStackHead,
+                        methodNameByNumber);
+
                     if (line.Contains("//"))
                     {
-                        WriteCommentsLogFile(line, strNumber, targetFileName, comments);
+                        WriteCommentsLogFile(line, strNumber, targetFileName, comment);
                         content.AppendLine(line);
                     }
                     else
                     {
-                        content.AppendLine(string.Format("{0} // [{1}]", line,
-                            GetStackStringFromValues(strNumber, comments, methodMinStackLength, methodNameByNumber,
-                                stackHeadByLine)));
+                        content.AppendLine(string.Format("{0} // {1}", line, comment));
                     }
                 }
                 else
@@ -162,43 +166,41 @@ namespace Commentator
             string line, 
             int strNumber, 
             string fileName, 
-            Dictionary<int, string[]> comments)
+            string newComment)
         {
             using (StreamWriter streamWriter = new StreamWriter(logFile, true))
             {
                 var ind = line.IndexOf("//");
                 var str = line.Substring(0, ind);
                 var comment = line.Substring(ind + 2, line.Length - ind - 2);
-                    streamWriter.WriteLine("File: "+fileName);
-                    streamWriter.WriteLine("String Number: "+strNumber);
-                    streamWriter.WriteLine("String: "+str.Trim());
-                    streamWriter.WriteLine("ExistingComment: "+comment);
-                    streamWriter.WriteLine("NewComment: ["+ string.Join(", ", comments[strNumber])+"]");
+                    streamWriter.WriteLine("File: " + fileName);
+                    streamWriter.WriteLine("String Number: " + strNumber);
+                    streamWriter.WriteLine("String: " + str.Trim());
+                    streamWriter.WriteLine("ExistingComment: " + comment);
+                    streamWriter.WriteLine("NewComment: " + newComment);
                     streamWriter.WriteLine("");
             }
         }
 
         private string GetStackStringFromValues(int strNumber, 
             Dictionary<int, string[]> comments, 
-            Dictionary<string, int> methodMinStackLength, 
-            Dictionary<int, string> methodNameByNumber,
-            Dictionary<int, int> stackHeadByLine)
+            Dictionary<string, int> methodMinStackHead, 
+            Dictionary<int, string> methodNameByNumber)
         {
             var stackValues = comments[strNumber];
             var stackValuesArray = stackValues
                  .Reverse()
-                 .Take(stackValues.Length - methodMinStackLength[methodNameByNumber[strNumber]] + 1)
+                 .Take(stackValues.Length - methodMinStackHead[methodNameByNumber[strNumber]])
                  .Reverse()
                  .ToArray();
-            var stackString = string.Join(", ", stackValuesArray);
-
+            var stackString = "[" + string.Join(", ", stackValuesArray) + "]";
             return stackString;
         }
 
         private void AddNewCommentToComments(
             CommentInfo commentInfo,
             Dictionary<int, string[]> comments,
-            Dictionary<string, int> methodMinStackLength,
+            Dictionary<string, int> methodMinStackHead,
             Dictionary<int, string> methodNameByNumber, 
             Dictionary<int, int> stackHeadByLine)
         {
@@ -208,8 +210,11 @@ namespace Commentator
 
             UpdateStackHead(commentInfo, stackHeadByLine, newStackValues, prevStackValues);
 
-            if (!methodMinStackLength.ContainsKey(commentInfo.MethodName))
-                methodMinStackLength.Add(commentInfo.MethodName, newStackValues.Length);
+            if (!methodMinStackHead.ContainsKey(commentInfo.MethodName))
+                methodMinStackHead.Add(commentInfo.MethodName, stackHeadByLine[commentInfo.StringNumber]);
+
+            if (stackHeadByLine[commentInfo.StringNumber] < methodMinStackHead[commentInfo.MethodName])
+                methodMinStackHead[commentInfo.MethodName] = stackHeadByLine[commentInfo.StringNumber];
 
             if (!comments.ContainsKey(commentInfo.StringNumber))
             {
@@ -218,19 +223,16 @@ namespace Commentator
                 return;
             }
 
-            UpdateCommentStackValues(commentInfo, comments, methodMinStackLength, newStackValues);
+            UpdateCommentStackValues(commentInfo, comments, methodMinStackHead, newStackValues);
         }
 
         private static void UpdateCommentStackValues(CommentInfo commentInfo, Dictionary<int, string[]> comments,
-            Dictionary<string, int> methodMinStackLength, string[] newStackValues)
+            Dictionary<string, int> methodMinStackHead, string[] newStackValues)
         {
             var currentStackValues = comments[commentInfo.StringNumber];
             if (newStackValues.Length == currentStackValues.Length)
             {
                 var newStack = MergeStackValues(newStackValues, currentStackValues);
-
-                if (newStackValues.Length < methodMinStackLength[commentInfo.MethodName])
-                    methodMinStackLength[commentInfo.MethodName] = newStackValues.Length;
 
                 comments[commentInfo.StringNumber] = newStack;
             }
