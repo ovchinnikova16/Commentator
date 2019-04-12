@@ -20,19 +20,18 @@ namespace Commentator
             File.WriteAllText(logFile, String.Empty);
         }
 
-
         public void AddComments()
         {
             var commentsByFile = GetCommentsInfoFromFile(infoFile);
 
-            foreach (var file in commentsByFile)
+            foreach (var kvp in commentsByFile)
             {
                 var comments = new Dictionary<int, string[]>();
                 var methodMinStackHead = new Dictionary<string, int>();
                 var methodNameByNumber = new Dictionary<int, string>();
                 var stackHeadByLine = new Dictionary<int, int>();
 
-                foreach (var commentInfo in commentsByFile[file.Key])
+                foreach (var commentInfo in commentsByFile[kvp.Key])
                 {
                     AddNewCommentToComments(
                         commentInfo, 
@@ -42,8 +41,8 @@ namespace Commentator
                         stackHeadByLine);
                 }
 
-                RewriteFileWithComments(file.Key, comments, methodNameByNumber, methodMinStackHead, stackHeadByLine);
-                Console.WriteLine("COMMENT: "+file.Key);
+                RewriteFileWithComments(kvp.Key, comments, methodNameByNumber, methodMinStackHead, stackHeadByLine);
+                Console.WriteLine("COMMENT: "+ kvp.Key);
             }
         }
 
@@ -290,9 +289,7 @@ namespace Commentator
                     if (e != ',') content.Append(e);
                 }
                 else
-                {
                     content.Append(e);
-                }
             }
             return content.ToString().Split('*').Where(x => x != "").ToArray();
         }

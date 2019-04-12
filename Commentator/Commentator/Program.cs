@@ -2,7 +2,10 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Xml;
+using EnvDTE80;
+using Microsoft.CodeAnalysis;
 using NUnit.Engine;
 
 namespace Commentator
@@ -16,24 +19,27 @@ namespace Commentator
 
             var infoFileName = @"C:\Users\e.ovc\Commentator\work\stackInfo.txt";
             var msbuildPath = @"C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\MSBuild\15.0\Bin";
-            //var targetAssembly = @"C:\Users\e.ovc\Commentator\project1\RequisitesReader\RequisitesReader.sln";
-            //var targetProjectPath = @"C:\Users\e.ovc\Commentator\project1\flash.props\PropertiesCollector";
-            var targetAssembly = @"C:\Users\e.ovc\Commentator\project1\flash.props\PropertiesCollector.sln";
+            var targetAssembly = @"C:\Users\e.ovc\Commentator\project1\RequisitesReader\RequisitesReader.sln";
+            //var targetAssembly = @"C:\Users\e.ovc\Commentator\project1\flash.props\PropertiesCollector.sln";
 
             var targetAssemblyPath = Path.GetDirectoryName(targetAssembly);
 
-            var rewrite = new Rewriter(targetAssemblyPath);
-            rewrite.RewriteToShellName();
+            var replacerTo = new Replacer("GroboIL", "Commentator.GroboILCollector");
+            replacerTo.Replace(targetAssemblyPath);
+
             BuildTargetAssembly(targetAssembly, msbuildPath);
 
             RunAllTests(targetAssemblyPath, infoFileName);
 
-            rewrite.RewriteFromShellName();
+            //var replacerFrom = new Replacer("Commentator.GroboILCollector", "GroboIL");
+            //replacerFrom.Replace(targetAssemblyPath);
 
-            AddCommentsToProject(infoFileName, targetAssemblyPath);
-            BuildTargetAssembly(targetAssembly, msbuildPath);
+            //var commentator = new Commentator(infoFileName, targetAssemblyPath);
+            //commentator.AddComments();
+
+            //BuildTargetAssembly(targetAssembly, msbuildPath);
+
         }
-
 
         private static void BuildTargetAssembly(string targetAssembly, string msbuildPath)
         {
@@ -56,8 +62,7 @@ namespace Commentator
             ITestEngine engine = TestEngineActivator.CreateInstance();
             var allFiles = Directory
                 .GetFiles(targetProjectPath, "*Test*.dll", SearchOption.AllDirectories)
-                .Where(x => x.Contains("Debug"))
-                .ToArray();
+                .Where(x => x.Contains("Debug"));
             foreach (var candidate in allFiles)
             {
                 Console.WriteLine("RUN_TESTS: "+Path.GetFileName(candidate));
@@ -65,29 +70,8 @@ namespace Commentator
                 Directory.SetCurrentDirectory(Path.GetDirectoryName(candidate));
                 TestPackage package = new TestPackage(candidate);
                 ITestRunner runner = engine.GetRunner(package);
-                XmlNode testResult = runner.Run(new NullListener(), TestFilter.Empty);
+                runner.Run(new NullListener(), TestFilter.Empty);
             }
-        }
-
-
-        public static string XmlNodeToString(XmlNode node, int indentation)
-        {
-            using (var sw = new System.IO.StringWriter())
-            {
-                using (var xw = new System.Xml.XmlTextWriter(sw))
-                {
-                    xw.Formatting = System.Xml.Formatting.Indented;
-                    xw.Indentation = indentation;
-                    node.WriteContentTo(xw);
-                }
-                return sw.ToString();
-            }
-        }
-
-        private static void AddCommentsToProject(string infoFileName, string projectName)
-        {
-            var commentator = new Commentator(infoFileName, projectName);
-            commentator.AddComments();
         }
 
         private class NullListener : ITestEventListener
