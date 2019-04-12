@@ -99,7 +99,6 @@ namespace Commentator
 
             foreach (var line in lines)
             {
-
                 if (comments.ContainsKey(strNumber))
                 {
                     var comment = GetStackStringFromValues(
@@ -114,15 +113,12 @@ namespace Commentator
                         content.AppendLine(line);
                     }
                     else
-                    {
                         content.AppendLine(string.Format("{0} // {1}", line, comment));
-                    }
                 }
                 else
                     content.AppendLine(line);
                 strNumber++;
             }
-
             File.WriteAllText(targetFileName, content.ToString(), Encoding.UTF8);
         }
 
@@ -136,7 +132,6 @@ namespace Commentator
             foreach (var e in methodNameByNumber)
             {   
                 if (e.Key < 0) continue;
-  
                 if (!stringsByMethodName.ContainsKey(e.Value))
                     stringsByMethodName.Add(e.Value, new List<int>());
                 stringsByMethodName[e.Value].Add(e.Key);
@@ -188,12 +183,10 @@ namespace Commentator
             Dictionary<int, string> methodNameByNumber)
         {
             var stackValues = comments[strNumber];
-            var stackValuesArray = stackValues
-                 .Reverse()
-                 .Take(stackValues.Length - methodMinStackHead[methodNameByNumber[strNumber]])
-                 .Reverse()
-                 .ToArray();
+            var stackValuesArray = stackValues.Skip(methodMinStackHead[methodNameByNumber[strNumber]]);
+
             var stackString = "[" + string.Join(", ", stackValuesArray) + "]";
+
             return stackString;
         }
 
@@ -212,7 +205,6 @@ namespace Commentator
 
             if (!methodMinStackHead.ContainsKey(commentInfo.MethodName))
                 methodMinStackHead.Add(commentInfo.MethodName, stackHeadByLine[commentInfo.StringNumber]);
-
             if (stackHeadByLine[commentInfo.StringNumber] < methodMinStackHead[commentInfo.MethodName])
                 methodMinStackHead[commentInfo.MethodName] = stackHeadByLine[commentInfo.StringNumber];
 
@@ -230,19 +222,14 @@ namespace Commentator
             Dictionary<string, int> methodMinStackHead, string[] newStackValues)
         {
             var currentStackValues = comments[commentInfo.StringNumber];
-            if (newStackValues.Length == currentStackValues.Length)
-            {
-                var newStack = MergeStackValues(newStackValues, currentStackValues);
 
-                comments[commentInfo.StringNumber] = newStack;
-            }
-            else
-            {
-                if (newStackValues.Length > currentStackValues.Length)
-                    comments[commentInfo.StringNumber] = newStackValues;
-                else
-                    comments[commentInfo.StringNumber] = currentStackValues;
-            }
+            var len = Math.Min(currentStackValues.Length, newStackValues.Length);
+
+            var newStack = MergeStackValues(
+                newStackValues.Skip(newStackValues.Length - len).ToArray(), 
+                currentStackValues.Skip(currentStackValues.Length - len).ToArray());
+
+            comments[commentInfo.StringNumber] = newStack;
         }
 
         private static void UpdateStackHead(
@@ -266,7 +253,7 @@ namespace Commentator
 
         private static string[] MergeStackValues(string[] newStackValues, string[] currentStackValues)
         {
-            var len = Math.Min(newStackValues.Length, currentStackValues.Length);
+            var len = newStackValues.Length;
             var newStack = new string[len];
 
             for (int i = len - 1; i >= 0; i--)
@@ -310,11 +297,12 @@ namespace Commentator
             return content.ToString().Split('*').Where(x => x != "").ToArray();
         }
     }
+
     public class CommentInfo
     {
         public string FileName { get; }
         public string MethodName { get; }
-        public int StringNumber { get; set; }
+        public int StringNumber { get; }
         public string StackInfo { get; }
         public string PrevStackInfo { get; }
 

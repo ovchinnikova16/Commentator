@@ -413,7 +413,6 @@ namespace Commentator
             var prevStackValues = GetStackValues();
             base.Ldarg(index);
             var newStackValues = GetStackValues();
-            var stackTrace = new StackTrace(true);
             if (index == 0 && !isStatic)
             {
                 var values = newStackValues.Split(' ');
@@ -423,7 +422,6 @@ namespace Commentator
 
             SaveStackInfo(prevStackValues, newStackValues);
         }
-
 
         public new void Starg(int index)
         {

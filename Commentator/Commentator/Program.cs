@@ -16,9 +16,9 @@ namespace Commentator
 
             var infoFileName = @"C:\Users\e.ovc\Commentator\work\stackInfo.txt";
             var msbuildPath = @"C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\MSBuild\15.0\Bin";
-            var targetAssembly = @"C:\Users\e.ovc\Commentator\project1\RequisitesReader\RequisitesReader.sln";
+            //var targetAssembly = @"C:\Users\e.ovc\Commentator\project1\RequisitesReader\RequisitesReader.sln";
             //var targetProjectPath = @"C:\Users\e.ovc\Commentator\project1\flash.props\PropertiesCollector";
-            //var targetAssemblyPath = @"C:\Users\e.ovc\Commentator\project1\flash.props";
+            var targetAssembly = @"C:\Users\e.ovc\Commentator\project1\flash.props\PropertiesCollector.sln";
 
             var targetAssemblyPath = Path.GetDirectoryName(targetAssembly);
 
