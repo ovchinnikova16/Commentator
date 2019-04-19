@@ -4,9 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Xml;
-using EnvDTE80;
-using Microsoft.CodeAnalysis;
 using NUnit.Engine;
+using Process = System.Diagnostics.Process;
 
 namespace Commentator
 {
@@ -24,21 +23,50 @@ namespace Commentator
 
             var targetAssemblyPath = Path.GetDirectoryName(targetAssembly);
 
+            AddReferences(targetAssemblyPath);
+
             var replacerTo = new Replacer("GroboIL", "Commentator.GroboILCollector");
             replacerTo.Replace(targetAssemblyPath);
+
 
             BuildTargetAssembly(targetAssembly, msbuildPath);
 
             RunAllTests(targetAssemblyPath, infoFileName);
 
-            //var replacerFrom = new Replacer("Commentator.GroboILCollector", "GroboIL");
-            //replacerFrom.Replace(targetAssemblyPath);
+            var replacerFrom = new Replacer("Commentator.GroboILCollector", "GroboIL");
+            replacerFrom.Replace(targetAssemblyPath);
 
-            //var commentator = new Commentator(infoFileName, targetAssemblyPath);
-            //commentator.AddComments();
+            var commentator = new Commentator(infoFileName, targetAssemblyPath);
+            commentator.AddComments();
 
-            //BuildTargetAssembly(targetAssembly, msbuildPath);
+            BuildTargetAssembly(targetAssembly, msbuildPath);
 
+        }
+
+        private static void AddReferences(string targetAssemblyPath)
+        {
+            var allProjects = Directory
+                .GetFiles(targetAssemblyPath, "*.csproj", SearchOption.AllDirectories);
+
+            foreach (var project in allProjects)
+            {
+                var currentFile = Process.GetCurrentProcess().MainModule.FileName;
+                var xml = new XmlDocument();
+                xml.Load(project);
+
+                var newNode = xml.CreateNode(XmlNodeType.Element, "Reference", null);
+                newNode.Attributes.Append(xml.CreateAttribute("Include"));
+                newNode.Attributes.Item(0).Value = Assembly.GetCallingAssembly().FullName;
+                var firstChild = xml.CreateNode(XmlNodeType.Element, "HintPath", null);
+                firstChild.InnerText = currentFile;
+                newNode.AppendChild(firstChild);
+
+                xml.GetElementsByTagName("Reference")
+                    .Item(0)
+                    .ParentNode
+                    .AppendChild(newNode);
+                xml.Save(project);
+            }
         }
 
         private static void BuildTargetAssembly(string targetAssembly, string msbuildPath)
