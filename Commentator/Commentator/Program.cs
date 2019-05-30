@@ -1,111 +1,231 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Xml;
+using CommandLine;
 using NUnit.Engine;
+using log4net.Config;
 using Process = System.Diagnostics.Process;
+using log4net;
+using System.Collections.Generic;
+using System;
 
 namespace Commentator
 {
     class Program
     {
+        private static ILog logger = LogManager.GetLogger(typeof(Program));
+
+        public class Options
+        {
+            [Option("gen-projects", HelpText = "Target projects that generate IL code.", Required = true)]
+            public IEnumerable<string> GeneratorProjects { get; set; }
+
+            [Option("test-projects", HelpText = "Projects with tests that run generators from target projects.", Required = true)]
+            public IEnumerable<string> GeneratorTestsProjects { get; set; }
+
+            [Option("msbuild-path", HelpText = "Path to MSBuild binary.", Required = true)]
+            public string MsBuildPath { get; set; }
+        }
+
         static void Main(string[] args)
         {
-            //string command = args[0];
-            //string targetAssemblyPath = args[1];
+            var stackInfoFileName = Path.GetTempFileName();
+            Environment.SetEnvironmentVariable(Constants.StackInfoFileNameEnvVariable,
+                stackInfoFileName);
+            BasicConfigurator.Configure();
 
-            var infoFileName = @"C:\Users\e.ovc\Commentator\work\stackInfo.txt";
-            var msbuildPath = @"C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\MSBuild\15.0\Bin";
-            var targetAssembly = @"C:\Users\e.ovc\Commentator\project1\RequisitesReader\RequisitesReader.sln";
-            //var targetAssembly = @"C:\Users\e.ovc\Commentator\project1\flash.props\PropertiesCollector.sln";
-
-            var targetAssemblyPath = Path.GetDirectoryName(targetAssembly);
-
-            AddReferences(targetAssemblyPath);
-
-            var replacerTo = new Replacer("GroboIL", "Commentator.GroboILCollector");
-            replacerTo.Replace(targetAssemblyPath);
-
-
-            BuildTargetAssembly(targetAssembly, msbuildPath);
-
-            RunAllTests(targetAssemblyPath, infoFileName);
-
-            var replacerFrom = new Replacer("Commentator.GroboILCollector", "GroboIL");
-            replacerFrom.Replace(targetAssemblyPath);
-
-            var commentator = new Commentator(infoFileName, targetAssemblyPath);
-            commentator.AddComments();
-
-            BuildTargetAssembly(targetAssembly, msbuildPath);
-
+            Parser.Default.ParseArguments<Options>(args)
+                .WithParsed(options => Run(options, stackInfoFileName));
         }
 
-        private static void AddReferences(string targetAssemblyPath)
+        static void Run(Options options, string stackInfoFileName)
         {
-            var allProjects = Directory
-                .GetFiles(targetAssemblyPath, "*.csproj", SearchOption.AllDirectories);
+            var generatorProjects = options.GeneratorProjects.Select(p => Path.GetFullPath(p)).ToList();
+            var generatorTestsProjects = options.GeneratorTestsProjects.Select(p => Path.GetFullPath(p)).ToList();
 
-            foreach (var project in allProjects)
+            var forwardReplacer = new Replacer("GroboIL", "Commentator.GroboILCollector");
+            foreach (var projectPath in generatorProjects)
             {
-                var currentFile = Process.GetCurrentProcess().MainModule.FileName;
+                forwardReplacer.Replace(projectPath);
+                AddReference(projectPath);
+            }
+
+            foreach (var projectPath in generatorProjects.Concat(generatorTestsProjects))
+                BuildProject(projectPath, options.MsBuildPath);
+
+            foreach (var projectPath in generatorTestsProjects)
+                RunAllTests(projectPath);
+
+            var backwardReplacer = new Replacer("Commentator.GroboILCollector", "GroboIL");
+            foreach (var projectPath in generatorProjects)
+            {
+                RemoveReference(projectPath);
+                backwardReplacer.Replace(projectPath);
+            }
+
+            var commentWriter = CommentWriter.Load(stackInfoFileName);
+            foreach (var projectPath in generatorProjects)
+                commentWriter.AddComments(projectPath);
+        }
+
+        private static IEnumerable<string> FindProjectFiles(string projectPath)
+        {
+            var projectFiles = Directory.GetFiles(projectPath, "*.csproj");
+            if (projectFiles.Length == 0)
+            {
+                logger.Warn($"Failed to find project file at {projectPath}");
+            }
+            return projectFiles;
+        }
+
+        private static void AddReference(string projectPath)
+        {
+            try
+            {
+                foreach (var projectFile in FindProjectFiles(projectPath))
+                {
+                    var xml = new XmlDocument();
+                    xml.Load(projectFile);
+
+                    var namespaceURI = xml.GetElementsByTagName("Project")
+                        .Cast<XmlNode>()
+                        .FirstOrDefault()
+                        ?.NamespaceURI;
+
+                    var newNode = xml.CreateElement("Reference", namespaceURI);
+                    newNode.Attributes.Append(xml.CreateAttribute("Include"));
+                    newNode.Attributes.Item(0).Value = Assembly.GetCallingAssembly().FullName;
+                    var firstChild = xml.CreateElement("HintPath", namespaceURI);
+                    firstChild.InnerText = Process.GetCurrentProcess().MainModule.FileName;
+                    newNode.AppendChild(firstChild);
+
+                    xml.GetElementsByTagName("Reference")
+                        .Item(0)
+                        .ParentNode
+                        .AppendChild(newNode);
+                    xml.Save(projectFile);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Warn($"Failed to add reference to project {projectPath}", ex);
+            }
+        }
+
+        private static void RemoveReference(string projectPath)
+        {
+            try
+            {
+                var processFileName = Process.GetCurrentProcess().MainModule.FileName;
+                foreach (var projectFile in FindProjectFiles(projectPath))
+                {
+                    var xml = new XmlDocument();
+                    xml.Load(projectFile);
+
+                    var addedNode = xml.GetElementsByTagName("Reference")
+                        .Cast<XmlNode>()
+                        .FirstOrDefault(node =>
+                        {
+                            var hintPathNode = node.ChildNodes.Cast<XmlNode>().FirstOrDefault(n => n.Name == "HintPath");
+                            return hintPathNode?.InnerText == processFileName;
+                        });
+                    addedNode.ParentNode.RemoveChild(addedNode);
+                    xml.Save(projectFile);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Warn($"Failed to remove reference from project {projectPath}", ex);
+            }
+        }
+
+        private static void BuildProject(string projectPath, string msBuildPath)
+        {
+            try
+            {
+                foreach (var projectFile in FindProjectFiles(projectPath))
+                {
+                    Process process = new Process();
+                    ProcessStartInfo startInfo = new ProcessStartInfo
+                    {
+                        FileName = "cmd.exe",
+                        Arguments = @"/c cd "
+                                          + Path.GetDirectoryName(msBuildPath)
+                                          + @" && "
+                                          + $"{Path.GetFileName(msBuildPath)} "
+                                          + Path.GetFullPath(projectFile)
+                                          + " -property:Configuration=Debug",
+                        RedirectStandardOutput = true,
+                        UseShellExecute = false,
+                    };
+                    process.StartInfo = startInfo;
+                    process.Start();
+
+                    while (!process.StandardOutput.EndOfStream)
+                        logger.Debug($"Build output: {process.StandardOutput.ReadLine()}");
+
+                    process.WaitForExit();
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Warn($"Failed to build {projectPath}", ex);
+            }
+        }
+
+        private static void RunAllTests(string targetProjectPath)
+        {
+            try
+            {
+                foreach (var testAssemblyPath in GetAssemblyPaths(targetProjectPath))
+                {
+                    ITestEngine engine = TestEngineActivator.CreateInstance();
+                    logger.Debug($"Running tests from {testAssemblyPath} from project {targetProjectPath}");
+
+                    Directory.SetCurrentDirectory(Path.GetDirectoryName(testAssemblyPath));
+                    TestPackage package = new TestPackage(testAssemblyPath);
+                    ITestRunner runner = engine.GetRunner(package);
+                    runner.Run(new LoggingListener(testAssemblyPath), TestFilter.Empty);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Warn($"Failed to run tests for {targetProjectPath}", ex);
+            }
+        }
+
+        private static IEnumerable<string> GetAssemblyPaths(string projectPath)
+        {
+            return FindProjectFiles(projectPath).Select(projectFile =>
+            {
                 var xml = new XmlDocument();
-                xml.Load(project);
+                xml.Load(projectFile);
 
-                var newNode = xml.CreateNode(XmlNodeType.Element, "Reference", null);
-                newNode.Attributes.Append(xml.CreateAttribute("Include"));
-                newNode.Attributes.Item(0).Value = Assembly.GetCallingAssembly().FullName;
-                var firstChild = xml.CreateNode(XmlNodeType.Element, "HintPath", null);
-                firstChild.InnerText = currentFile;
-                newNode.AppendChild(firstChild);
+                var assemblyName = xml.GetElementsByTagName("AssemblyName").Cast<XmlNode>().FirstOrDefault()?.InnerText;
+                if (assemblyName == null)
+                {
+                    return null;
+                }
+                assemblyName = $"{assemblyName}.dll";
 
-                xml.GetElementsByTagName("Reference")
-                    .Item(0)
-                    .ParentNode
-                    .AppendChild(newNode);
-                xml.Save(project);
-            }
+                return Directory.EnumerateFiles(projectPath, assemblyName, SearchOption.AllDirectories).FirstOrDefault();
+            }).Where(o => o != null);
         }
 
-        private static void BuildTargetAssembly(string targetAssembly, string msbuildPath)
+        private class LoggingListener : ITestEventListener
         {
-            Process process = new Process();
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.FileName = "cmd.exe";
-            startInfo.Arguments = @"/c cd "
-                                  + msbuildPath
-                                  + @" && MSBuild.exe " 
-                                  + targetAssembly 
-                                  + " -property:Configuration=Debug";
-            process.StartInfo = startInfo;
-            process.Start();
-            process.WaitForExit();
-        }
+            private readonly string assemblyPath;
 
-        private static void RunAllTests(string targetProjectPath, string infoFileName)
-        {
-            File.WriteAllText(infoFileName, string.Empty);
-            ITestEngine engine = TestEngineActivator.CreateInstance();
-            var allFiles = Directory
-                .GetFiles(targetProjectPath, "*Test*.dll", SearchOption.AllDirectories)
-                .Where(x => x.Contains("Debug"));
-            foreach (var candidate in allFiles)
+            public LoggingListener(string assemblyPath)
             {
-                Console.WriteLine("RUN_TESTS: "+Path.GetFileName(candidate));
-
-                Directory.SetCurrentDirectory(Path.GetDirectoryName(candidate));
-                TestPackage package = new TestPackage(candidate);
-                ITestRunner runner = engine.GetRunner(package);
-                runner.Run(new NullListener(), TestFilter.Empty);
+                this.assemblyPath = assemblyPath;
             }
-        }
-
-        private class NullListener : ITestEventListener
-        {
+            
             public void OnTestEvent(string report)
             {
+                logger.Debug($"Event from test runner for {assemblyPath}:\n{report}");
             }
         }
     }

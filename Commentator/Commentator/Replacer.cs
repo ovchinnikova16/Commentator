@@ -1,6 +1,5 @@
-﻿using System;
+﻿using log4net;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -8,6 +7,8 @@ namespace Commentator
 {
     public class Replacer
     {
+        private static readonly ILog logger = LogManager.GetLogger(typeof(Replacer));
+
         private readonly string currentName;
         private readonly string targetName; 
 
@@ -19,10 +20,9 @@ namespace Commentator
 
         public void Replace(string root)
         {
-            var allFiles = Directory.GetFiles(root, "*.cs", SearchOption.AllDirectories);
-            foreach (var candidate in allFiles)
+            foreach (var candidate in Directory.GetFiles(root, "*.cs", SearchOption.AllDirectories))
             {
-                Console.WriteLine("REPLACE: " + candidate);
+                logger.Debug($"REPLACE: {candidate}");
                 ReplaceTo(candidate);
             }
         }

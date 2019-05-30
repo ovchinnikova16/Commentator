@@ -7,14 +7,17 @@ using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using System.Text;
 using GrEmit;
+using log4net;
+using Newtonsoft.Json;
 
 namespace Commentator
 {
     public class GroboILCollector : GroboIL
     {
         private static readonly FieldInfo StackFieldInfo = typeof(GroboIL).GetField("stack", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly ILog logger = LogManager.GetLogger(typeof(GroboILCollector));
 
-        private string stackInfoFileName = @"C:\Users\e.ovc\Commentator\work\stackInfo.txt";
+        private readonly string stackInfoFileName = GetStackInfoFileName();
 
         private bool isStatic = false;
         public GroboILCollector(MethodBuilder methodBuilder) : base(methodBuilder)
@@ -903,17 +906,30 @@ namespace Commentator
             SaveStackInfo(prevStackValues, newStackValues);
         }
 
+        private static string GetStackInfoFileName()
+        {
+            var fileName = Environment.GetEnvironmentVariable(Constants.StackInfoFileNameEnvVariable);
+            if (fileName == null)
+            {
+                logger.Warn("Failed to obtain stack info file name form environment, using temp file");
+                fileName = Path.GetTempFileName();
+            }
+            logger.Debug($"Writing stack info to {fileName}");
+            return fileName;
+        }
+
         private void SaveStackInfo(string prevStackValues, string newStackValues)
         {
             var stackTrace = new StackTrace(true);
 
-            var sB = new StringBuilder();
-            sB.AppendLine(stackTrace.GetFrame(2).GetFileName());
-            sB.AppendLine(stackTrace.GetFrame(2).GetMethod().Name);
-            sB.AppendLine((stackTrace.GetFrame(2).GetFileLineNumber()).ToString());
-            sB.AppendLine(prevStackValues);
-            sB.AppendLine(newStackValues);
-            File.AppendAllText(stackInfoFileName, sB.ToString());
+            var commentInfo = new CommentInfo {
+                FileName = stackTrace.GetFrame(2).GetFileName(),
+                MethodName = stackTrace.GetFrame(2).GetMethod().Name,
+                LineNumber = stackTrace.GetFrame(2).GetFileLineNumber(),
+                PreviousStackValues = prevStackValues,
+                NewStackValues = newStackValues,
+            };
+            File.AppendAllLines(stackInfoFileName, new[] { JsonConvert.SerializeObject(commentInfo) });
         }
 
         private string GetStackValues()
